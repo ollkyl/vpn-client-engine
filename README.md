@@ -1,75 +1,93 @@
 # VPN Client Engine
 
-A lightweight, reusable VPN client foundation for building custom VPN applications.
+**Lightweight, reusable VPN client core** based on [Amnezia Client](https://github.com/amnezia-vpn/amnezia-client).
 
-This project is derived from [Amnezia Client](https://github.com/amnezia-vpn/amnezia-client) and preserves its core VPN functionality while removing Amnezia-specific product features such as accounts, subscriptions, server marketplace, SSH-based server deployment, and multi-server management.
+This project keeps the solid VPN functionality of Amnezia (protocols, killswitch, split tunneling, privileged service) and removes the product layer (accounts, subscriptions, server marketplace, SSH deployment).
 
-The goal is to provide a clean technical base that developers can build their own VPN products on top of, without first having to remove an existing product layer.
+Ideal foundation if you want to build **your own VPN client** with your own UI and backend.
 
-## Why this exists
+[![License](https://img.shields.io/badge/license-GPLv3-blue.svg)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue)]()
+[![Protocols](https://img.shields.io/badge/protocols-OpenVPN%20%7C%20WireGuard%20%7C%20AmneziaWG%20%7C%20XRay%20%7C%20IKEv2-green)]()
 
-[Amnezia Client](https://github.com/amnezia-vpn/amnezia-client) is a mature VPN client with support for multiple protocols, killswitch, split tunneling, DNS handling, and a privileged service architecture.
+---
+
+### Why this exists
+
+[Amnezia Client](https://github.com/amnezia-vpn/amnezia-client) is a mature and well-engineered VPN client with support for multiple protocols, killswitch, split tunneling, DNS handling, and a privileged service architecture.
 
 However, the upstream client is also a complete product with its own:
 
-* account and subscription system
-* server marketplace
-* server management
-* SSH-based server deployment
-* multi-server UI
-* product-specific UI and backend integration
+- Account and subscription system
+- Server marketplace
+- Server management
+- SSH-based server deployment
+- Multi-server UI
+- Product-specific UI and backend integration
 
 If you want to build a different VPN product on the same technical foundation, much of that product layer is not needed.
 
 This project removes that layer while preserving the underlying VPN client functionality.
 
-## What is included
+---
+
+### Who is this for?
+
+- Developers who want to create their own VPN product
+- Teams that need Amnezia’s protocol stack without Amnezia’s product features
+- Anyone who wants a cleaner starting point than forking the full Amnezia Client
+
+---
+
+### What is included
 
 The following functionality remains available and is based on the upstream Amnezia Client implementation:
 
-* VPN client and privileged background service
-* Killswitch
-* Application and website split tunneling
-* DNS configuration and handling
-* Connection management
-* Importing VPN server configurations
-* Connecting and disconnecting from a configured server
-* Logging
-* Backup and restore
-* Application update checks
+- VPN client and privileged background service
+- Killswitch
+- Application and website split tunneling
+- DNS configuration and handling
+- Connection management
+- Importing VPN server configurations
+- Connecting and disconnecting from a configured server
+- Logging
+- Backup and restore
+- Application update checks
 
-### Supported protocols
+#### Supported protocols
 
-* OpenVPN
-* WireGuard
-* AmneziaWG (awg)
-* IKEv2
-* XRay (VLESS)
+- OpenVPN
+- WireGuard
+- AmneziaWG (awg)
+- IKEv2
+- XRay (VLESS)
 
-## What was removed
+---
+
+### What was removed
 
 Compared with the upstream Amnezia Client, this project removes functionality specific to the Amnezia product rather than the underlying VPN functionality.
 
-### Product and account layer
+#### Product and account layer
 
-* Amnezia cloud accounts
-* Login and account management
-* Subscriptions and billing
-* News and product notifications
-* Server marketplace
-* Product-specific advertisements and premium UI
+- Amnezia cloud accounts
+- Login and account management
+- Subscriptions and billing
+- News and product notifications
+- Server marketplace
+- Product-specific advertisements and premium UI
 
-### Server management
+#### Server management
 
-* Multi-server management
-* Server marketplace integration
-* Server installation and deployment through SSH
-* Self-hosted multi-user administration
-* Automatic installation and management of server-side containers
+- Multi-server management
+- Server marketplace integration
+- Server installation and deployment through SSH
+- Self-hosted multi-user administration
+- Automatic installation and management of server-side containers
 
 The client now assumes that a VPN server configuration is provided externally and imported into the application.
 
-### Removed UI and supporting code
+#### Removed UI and supporting code
 
 Several C++ UI-model classes and related QML pages that existed only to support the removed product functionality were removed.
 
@@ -77,25 +95,29 @@ Several C++ UI-model classes and related QML pages that existed only to support 
 
 Other unused product-related models, fields, notifications, and UI components were removed where they had no effect on VPN functionality.
 
-## What was preserved
+---
+
+### What was preserved
 
 The core VPN functionality and the underlying service architecture were preserved.
 
 The following parts of the upstream architecture remain:
 
-* VPN protocol implementations
-* Tunnel establishment
-* Privileged networking service
-* Killswitch
-* Split tunneling
-* DNS handling
-* Connection management
-* Protocol configuration
-* Core/service communication
+- VPN protocol implementations
+- Tunnel establishment
+- Privileged networking service
+- Killswitch
+- Split tunneling
+- DNS handling
+- Connection management
+- Protocol configuration
+- Core/service communication
 
 The purpose of this project is to remove the product layer and make the existing VPN client functionality easier to reuse, not to replace the underlying VPN implementations.
 
-## Servers
+---
+
+### Servers
 
 There is no server marketplace, account system, or server deployment mechanism in this project.
 
@@ -105,49 +127,51 @@ The configuration must use the native Amnezia configuration format supported by 
 
 Server configurations can be:
 
-* generated by your own backend;
-* provided through your own provisioning system;
-* generated manually using compatible server-side tooling.
+- generated by your own backend;
+- provided through your own provisioning system;
+- generated manually using compatible server-side tooling.
 
 This keeps the client independent from any particular backend or server-management system.
 
-## Building
+---
+
+### Building
 
 The build toolchain is the same as the upstream Amnezia Client.
 
-### Requirements
+#### Requirements
 
-* CMake
-* Conan 2
-* Python 3.12+
-* Qt 6.10+
+- CMake
+- Conan 2
+- Python 3.12+
+- Qt 6.10+
 
-### Windows
+**Windows**
 
-* Visual Studio 2022 or Visual Studio 2022 Build Tools
-* Qt 6.10+
-* Qt 5 Compatibility Module
-* Qt Remote Objects
+- Visual Studio 2022 or Visual Studio 2022 Build Tools
+- Qt 6.10+
+- Qt 5 Compatibility Module
+- Qt Remote Objects
 
-### Linux
+**Linux**
 
-* `make`
-* `gcc`
-* Qt 6.10+
+- make
+- gcc
+- Qt 6.10+
 
-Python 3.12+ is required because some Conan recipes use f-string syntax introduced by PEP 701. Older Python versions may cause Conan to fail with a `SyntaxError` before the build starts.
+> Python 3.12+ is required because some Conan recipes use f-string syntax introduced by PEP 701. Older Python versions may cause Conan to fail with a `SyntaxError` before the build starts.
 
-### Build
+#### Build
 
-Windows:
+**Windows:**
 
-```text
+```bash
 deploy\build.bat
 ```
 
-Linux:
+**Linux:**
 
-```text
+```bash
 ./deploy/build.sh
 ```
 
@@ -155,86 +179,88 @@ Run either script with `-h` to see the available options.
 
 For example:
 
-```text
+```bash
 --installer all
 ```
 
 can be used to build an installer in addition to the raw binaries.
 
-## Running
+---
+
+### Running
 
 The privileged helper service must run with elevated privileges:
 
-* Administrator on Windows
-* root on Linux
+- Administrator on Windows
+- root on Linux
 
 Without the required privileges, platform networking operations may fail and the VPN connection will not be established.
 
-### Windows
+#### Windows
 
 Start the service from an elevated PowerShell:
 
-```powershell
+```bash
 deploy\build\service\server\Release\AmneziaVPN-service.exe x
 ```
 
 Then start the client from a regular PowerShell:
 
-```powershell
+```bash
 deploy\build\client\Release\AmneziaVPN.exe
 ```
 
-The service executable requires a non-empty command-line argument when started manually.
-
-Without arguments, it attempts to start through the Windows Service Control Manager and exits unless it was actually launched by the SCM.
-
+The service executable requires a non-empty command-line argument when started manually.  
+Without arguments, it attempts to start through the Windows Service Control Manager and exits unless it was actually launched by the SCM.  
 Any non-empty argument makes it run as a regular foreground process, which is the intended mode for development and manual testing.
 
-## Testing
+---
+
+### Testing
 
 The built client was tested after compilation to verify that the resulting binaries can establish a real VPN connection, rather than only completing the build successfully.
 
-### Windows
+#### Windows
 
 1. Start the privileged service from an elevated PowerShell:
 
-```powershell
+```bash
 cd deploy\build\service\server\Release
 .\AmneziaVPN-service.exe x
 ```
 
 2. Start the client from a regular PowerShell:
 
-```powershell
+```bash
 deploy\build\client\Release\AmneziaVPN.exe
 ```
 
 3. In the opened client:
 
-   * Go to **Home**
-   * Select **Import configuration**
-   * Import a valid Amnezia-compatible server configuration
-   * Connect to the imported server
+   - Go to **Home**
+   - Select **Import configuration**
+   - Import a valid Amnezia-compatible server configuration
+   - Connect to the imported server
 
-The client was successfully tested with an imported server configuration after building the project from source.
-
+The client was successfully tested with an imported server configuration after building the project from source.  
 This verifies that the extracted client functionality is operational and capable of establishing a real VPN connection.
 
-## Building a custom product on top
+---
 
-This project intentionally does not provide an account system, backend API, authentication, subscriptions, or product-specific UI.
+### Building a custom product on top
 
+This project intentionally does not provide an account system, backend API, authentication, subscriptions, or product-specific UI.  
 These components can be implemented independently.
 
 A typical integration can follow the existing application architecture.
 
-### 1. Core controller
+#### 1. Core controller
 
 Create a core-layer `QObject` responsible for HTTP communication and business logic.
 
 See:
 
-```text
+```
 client/core/controllers/updateController.h
 client/core/controllers/updateController.cpp
 ```
@@ -253,22 +279,22 @@ with results consumed through:
 .then(this, ...)
 ```
 
-### 2. QML UI controller
+#### 2. QML UI controller
 
 Add a thin `*UiController` layer that exposes the core functionality to QML through `Q_INVOKABLE` methods, public slots, and signals.
 
 Example:
 
-```text
+```
 client/ui/controllers/updateUiController.h
 client/ui/controllers/updateUiController.cpp
 ```
 
-### 3. Register the controller
+#### 3. Register the controller
 
 Register the controller in:
 
-```text
+```
 client/core/controllers/coreController.cpp
 ```
 
@@ -280,17 +306,17 @@ Then expose it to QML with:
 setQmlContextProperty("YourController", yourUiController);
 ```
 
-### 4. Add your own UI
+#### 4. Add your own UI
 
 Custom QML pages can be added under:
 
-```text
+```
 client/ui/qml/Pages2/
 ```
 
 The page must also be added to:
 
-```text
+```
 client/ui/qml/qml.qrc
 ```
 
@@ -298,17 +324,17 @@ client/ui/qml/qml.qrc
 
 New page identifiers can be added to:
 
-```text
+```
 client/ui/utils/pageEnum.h
 ```
 
 The page enum is not persisted, so adding new values is safe.
 
-## Architecture
+---
 
-At a high level, the intended architecture is:
+### Architecture
 
-```text
+```
 Your VPN Product
 │
 ├── Your UI
@@ -334,7 +360,9 @@ Your VPN Product
 
 The application-specific layer is intentionally left to the developer building the product.
 
-## Relationship to Amnezia Client
+---
+
+### Relationship to Amnezia Client
 
 This project is derived from the open-source [Amnezia Client](https://github.com/amnezia-vpn/amnezia-client).
 
@@ -344,10 +372,12 @@ This repository focuses on removing product-specific functionality and providing
 
 This is an independent project and is not affiliated with, sponsored by, or endorsed by Amnezia VPN.
 
-## License
+---
 
-GPLv3, inherited from the upstream Amnezia Client project.
+### License
 
-See [`LICENSE`](LICENSE) for the full license text.
+GPLv3, inherited from the upstream Amnezia Client project.  
+See [LICENSE](LICENSE) for the full license text.
 
 When redistributing or modifying this project, comply with the requirements of the GPLv3 and the licenses of included third-party components.
+```
