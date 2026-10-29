@@ -23,6 +23,7 @@
 
 #include "leakdetector.h"
 #include "logger.h"
+#include "version.h"
 #include "daemon/daemonerrors.h"
 
 #include "core/utils/protocolEnum.h"
@@ -103,14 +104,7 @@ void LocalSocketController::initialize(const Device* device, const Keys* keys) {
 void LocalSocketController::initializeInternal() {
   m_daemonState = eInitializing;
 
-#ifdef MZ_WINDOWS
-  QString path = "\\\\.\\pipe\\amneziavpn";
-#else
-  QString path = "/var/run/amneziavpn/daemon.socket";
-  if (!QFileInfo::exists(path)) {
-    path = "/tmp/amneziavpn.socket";
-  }
-#endif
+  QString path = "\\\\.\\pipe\\" APPLICATION_NAME "-daemon";
 
   logger.debug() << "Connecting to:" << path;
   m_socket->connectToServer(path);

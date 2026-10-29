@@ -6,7 +6,6 @@
 #include "systemservice.h"
 #include "core/utils/utilities.h"
 
-#ifdef Q_OS_WIN
 #include "platforms/windows/daemon/windowsdaemontunnel.h"
 
 namespace {
@@ -14,13 +13,10 @@ int s_argc = 0;
 char** s_argv = nullptr;
 }  // namespace
 
-#endif
-
 int runApplication(int argc, char** argv)
 {
     QCoreApplication app(argc,argv);
 
-#ifdef Q_OS_WIN
     if(argc > 2){
         s_argc = argc;
         s_argv = argv;
@@ -34,13 +30,11 @@ int runApplication(int argc, char** argv)
             daemon->run(tokens);
         }
     }
-#endif
 
     LocalServer localServer;
     return app.exec();
 
 }
-
 
 int main(int argc, char **argv)
 {
@@ -52,12 +46,8 @@ int main(int argc, char **argv)
     }
     else {
         qInfo() << "Started as system service";
-#ifdef Q_OS_WIN
         SystemService systemService(argc, argv);
         return systemService.exec();
-#else
-    return runApplication(argc, argv);
-#endif
 
     }
 }

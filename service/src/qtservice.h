@@ -43,7 +43,6 @@
 
 #include <QCoreApplication>
 
-#if defined(Q_OS_WIN)
 #  if !defined(QT_QTSERVICE_EXPORT) && !defined(QT_QTSERVICE_IMPORT)
 #    define QT_QTSERVICE_EXPORT
 #  elif defined(QT_QTSERVICE_IMPORT)
@@ -55,9 +54,6 @@
 #    undef QT_QTSERVICE_EXPORT
 #    define QT_QTSERVICE_EXPORT __declspec(dllexport)
 #  endif
-#else
-#  define QT_QTSERVICE_EXPORT
-#endif
 
 class QtServiceControllerPrivate;
 

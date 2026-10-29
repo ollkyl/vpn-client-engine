@@ -2,76 +2,26 @@
 #include <QtNetwork/qnetworkinterface.h>
 #include <cstddef>
 
-#ifdef Q_OS_WIN
-    #include <windows.h>
-    #include <Ipexport.h>
-    #include <Ws2tcpip.h>
-    #include <ws2ipdef.h>
-    #include <Iphlpapi.h>
-    #include <Iptypes.h>
-    #include <WinSock2.h>
-    #include <winsock.h>
-    #include <QNetworkInterface>
-    #include "qendian.h"
-    #include <QSettings>
-#endif
-#ifdef Q_OS_LINUX
-    #include <arpa/inet.h>
-    #include <linux/netlink.h>
-    #include <linux/rtnetlink.h>
-    #include <net/if.h>
-    #include <sys/ioctl.h>
-    #include <sys/socket.h>
-    #include <unistd.h>
-#endif
-#if defined(Q_OS_MAC) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
-    #include <sys/param.h>
-    #include <sys/sysctl.h>
-    #include <sys/socket.h>
-    #include <netinet/in.h>
-    #include <arpa/inet.h>
-    #include <net/route.h>
-    #include <ifaddrs.h>
-    #include <net/if.h>
-    #include <net/if_dl.h>
-    #include <sys/types.h>
-    #include <sys/socket.h>
-    #include <arpa/inet.h>
-    #include <unistd.h>
-    #include <ifaddrs.h>
-    #include <net/if.h>
-#endif
+#include <windows.h>
+#include <Ipexport.h>
+#include <Ws2tcpip.h>
+#include <ws2ipdef.h>
+#include <Iphlpapi.h>
+#include <Iptypes.h>
+#include <WinSock2.h>
+#include <winsock.h>
+#include <QNetworkInterface>
+#include "qendian.h"
+#include <QSettings>
 
 #include <QHostAddress>
 #include <QHostInfo>
-
-QRegularExpression NetworkUtilities::ipAddressRegExp()
-{
-    return QRegularExpression("^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\\.(?!$)|$)){4}$");
-}
 
 QRegExp NetworkUtilities::ipAddressWithSubnetRegExp()
 {
     return QRegExp("(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\\.){3}"
                    "(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])"
                    "(\\/(?:[0-9]|[1-2][0-9]|3[0-2])){0,1}");
-}
-
-QRegExp NetworkUtilities::ipNetwork24RegExp()
-{
-    return QRegExp("^(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\\.){3}"
-                   "0$");
-}
-
-QRegExp NetworkUtilities::ipPortRegExp()
-{
-    return QRegExp("^()([1-9]|[1-5]?[0-9]{2,4}|6[1-4][0-9]{3}|65[1-4][0-9]{2}|655[1-2][0-9]|6553[1-5])$");
-}
-
-QRegExp NetworkUtilities::domainRegExp()
-{
-    return QRegExp("(((?!\\-))(xn\\-\\-)?[a-z0-9\\-_]{0,61}[a-z0-9]{1,1}\\.)*(xn\\-\\-)?([a-z0-9\\-]{1,61}|[a-z0-"
-                   "9\\-]{1,30})\\.[a-z]{2,}");
 }
 
 QString NetworkUtilities::netMaskFromIpWithSubnet(const QString ip)
@@ -100,23 +50,6 @@ QString NetworkUtilities::ipAddressFromIpWithSubnet(const QString ip)
     return ip.split("/").first();
 }
 
-QStringList NetworkUtilities::summarizeRoutes(const QStringList &ips, const QString cidr)
-{
-    //    QMap<int, int>
-    //    QHostAddress
-
-           //    QMap<QString, QStringList> subnets; // <"a.b", <list subnets>>
-
-           //    for (const QString &ip : ips) {
-           //        if (ip.count(".") != 3) continue;
-
-           //        const QStringList &parts = ip.split(".");
-           //        subnets[parts.at(0) + "." + parts.at(1)].append(ip);
-           //    }
-
-    return QStringList();
-}
-
 QString NetworkUtilities::getIPAddress(const QString &host)
 {
     QHostAddress address(host);
@@ -132,17 +65,6 @@ QString NetworkUtilities::getIPAddress(const QString &host)
     }
     qDebug() << "Unable to resolve address for " << host;
     return "";
-}
-
-QString NetworkUtilities::getStringBetween(const QString &s, const QString &a, const QString &b)
-{
-    int ap = s.indexOf(a), bp = s.indexOf(b, ap + a.length());
-    if (ap < 0 || bp < 0)
-        return QString();
-    ap += a.length();
-    if (bp - ap <= 0)
-        return QString();
-    return s.mid(ap, bp - ap).trimmed();
 }
 
 bool NetworkUtilities::checkIPv4Format(const QString &ip)
@@ -176,7 +98,6 @@ bool NetworkUtilities::checkIpSubnetFormat(const QString &ip)
 
 // static
 int NetworkUtilities::AdapterIndexTo(const QHostAddress& dst) {
-#ifdef Q_OS_WIN
     qDebug() << "Getting Current Internet Adapter that routes to"
              << dst.toString();
     quint32 ipBigEndian;
@@ -191,22 +112,9 @@ int NetworkUtilities::AdapterIndexTo(const QHostAddress& dst) {
         QNetworkInterface::interfaceFromIndex(routeInfo.dwForwardIfIndex);
     qDebug() << "Internet Adapter:" << adapter.name();
     return routeInfo.dwForwardIfIndex;
-#endif
     return 0;
 }
 
-bool NetworkUtilities::checkIpv6Enabled() {
-#ifdef Q_OS_WIN
-    QSettings RegHLM("HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services\\Tcpip6\\Parameters",
-                     QSettings::NativeFormat);
-    int ret = RegHLM.value("DisabledComponents", 0).toInt();
-    qDebug() << "Check for Windows disabled IPv6 return " << ret;
-    return (ret != 255);
-#endif
-    return true;
-}
-
-#ifdef Q_OS_WIN
 DWORD GetAdaptersAddressesWrapper(const ULONG Family,
                                   const ULONG Flags,
                                   const PVOID Reserved,
@@ -246,11 +154,9 @@ DWORD GetAdaptersAddressesWrapper(const ULONG Family,
 
     return dwRetVal;
 }
-#endif
 
 QPair<QString, QNetworkInterface> NetworkUtilities::getGatewayAndIface()
 {
-#ifdef Q_OS_WIN
     constexpr int BUFF_LEN = 100;
     char buff[BUFF_LEN] = {'\0'};
 
@@ -289,218 +195,4 @@ QPair<QString, QNetworkInterface> NetworkUtilities::getGatewayAndIface()
 
     free(pAdapterAddresses);
     return { resGateway, QNetworkInterface::interfaceFromIndex(resIndex) };
-#endif
-#ifdef Q_OS_LINUX
-    constexpr int BUFFER_SIZE = 8192;
-    int     received_bytes = 0, msg_len = 0, route_attribute_len = 0;
-    int     sock = -1, msgseq = 0;
-    struct  nlmsghdr *nlh, *nlmsg;
-    struct  rtmsg *route_entry;
-    // This struct contain route attributes (route type)
-    struct  rtattr *route_attribute;
-    char    gateway_address[INET_ADDRSTRLEN], interface[IF_NAMESIZE];
-    char    msgbuf[100], buffer[BUFFER_SIZE];
-    char    *ptr = buffer;
-    struct timeval tv;
-
-    if ((sock = socket(AF_NETLINK, SOCK_RAW, NETLINK_ROUTE)) < 0) {
-        perror("socket failed");
-        return {};
-    }
-
-    memset(msgbuf, 0, sizeof(msgbuf));
-    memset(gateway_address, 0, sizeof(gateway_address));
-    memset(interface, 0, sizeof(interface));
-    memset(buffer, 0, sizeof(buffer));
-
-    /* point the header and the msg structure pointers into the buffer */
-    nlmsg = (struct nlmsghdr *)msgbuf;
-
-    /* Fill in the nlmsg header*/
-    nlmsg->nlmsg_len = NLMSG_LENGTH(sizeof(struct rtmsg));
-    nlmsg->nlmsg_type = RTM_GETROUTE; // Get the routes from kernel routing table .
-    nlmsg->nlmsg_flags = NLM_F_DUMP | NLM_F_REQUEST; // The message is a request for dump.
-    nlmsg->nlmsg_seq = msgseq++; // Sequence of the message packet.
-    nlmsg->nlmsg_pid = getpid(); // PID of process sending the request.
-
-    /* 1 Sec Timeout to avoid stall */
-    tv.tv_sec = 1;
-    setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (struct timeval *)&tv, sizeof(struct timeval));
-    /* send msg */
-    if (send(sock, nlmsg, nlmsg->nlmsg_len, 0) < 0) {
-        perror("send failed");
-        return {};
-    }
-
-    /* receive response */
-    do
-    {
-        received_bytes = recv(sock, ptr, sizeof(buffer) - msg_len, 0);
-        if (received_bytes < 0) {
-            perror("Error in recv");
-            return {};
-        }
-
-        nlh = (struct nlmsghdr *) ptr;
-
-        /* Check if the header is valid */
-        if((NLMSG_OK(nlh, received_bytes) == 0) ||
-            (nlh->nlmsg_type == NLMSG_ERROR))
-        {
-            perror("Error in received packet");
-            return {};
-        }
-
-        /* If we received all data break */
-        if (nlh->nlmsg_type == NLMSG_DONE)
-            break;
-        else {
-            ptr += received_bytes;
-            msg_len += received_bytes;
-        }
-
-        /* Break if its not a multi part message */
-        if ((nlh->nlmsg_flags & NLM_F_MULTI) == 0)
-            break;
-    }
-    while ((nlh->nlmsg_seq != msgseq) || (nlh->nlmsg_pid != getpid()));
-
-    /* parse response */
-    int remaining = msg_len + received_bytes;
-    nlh = (struct nlmsghdr *) buffer;
-    for ( ; NLMSG_OK(nlh, remaining); nlh = NLMSG_NEXT(nlh, remaining))
-    {
-        /* Get the route data */
-        route_entry = (struct rtmsg *) NLMSG_DATA(nlh);
-
-        /* We are just interested in main routing table */
-        if (route_entry->rtm_table != RT_TABLE_MAIN)
-            continue;
-
-        /* Reset per-route to avoid cross-route state pollution */
-        memset(gateway_address, 0, sizeof(gateway_address));
-        memset(interface, 0, sizeof(interface));
-
-        route_attribute = (struct rtattr *) RTM_RTA(route_entry);
-        route_attribute_len = RTM_PAYLOAD(nlh);
-
-        /* Loop through all attributes */
-        for ( ; RTA_OK(route_attribute, route_attribute_len);
-             route_attribute = RTA_NEXT(route_attribute, route_attribute_len))
-        {
-            switch(route_attribute->rta_type) {
-            case RTA_OIF:
-                if_indextoname(*(int *)RTA_DATA(route_attribute), interface);
-                break;
-            case RTA_GATEWAY:
-                inet_ntop(AF_INET, RTA_DATA(route_attribute),
-                          gateway_address, sizeof(gateway_address));
-                break;
-            default:
-                break;
-            }
-        }
-
-        if ((*gateway_address) && (*interface)) {
-            qDebug() << "Gateway " << gateway_address << " for interface " << interface;
-            break;
-        }
-    }
-    if (!(*gateway_address) || !(*interface))
-        qDebug() << "getGatewayAndIface: no gateway found";
-    close(sock);
-    return { gateway_address, QNetworkInterface::interfaceFromName(interface) };
-#endif
-#if defined(Q_OS_MAC) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
-    QString gateway;
-    int index = -1;
-
-    int mib[] = {CTL_NET, PF_ROUTE, 0, 0, NET_RT_FLAGS, RTF_GATEWAY};
-    int afinet_type[] = {AF_INET, AF_INET6};
-
-    for (int ip_type = 0; ip_type <= 1; ip_type++)
-    {
-        mib[3] = afinet_type[ip_type];
-
-        size_t needed = 0;
-        if (sysctl(mib, sizeof(mib) / sizeof(int), nullptr, &needed, nullptr, 0) < 0)
-            return {};
-
-        char* buf;
-        if ((buf = new char[needed]) == 0)
-            return {};
-
-        if (sysctl(mib, sizeof(mib) / sizeof(int), buf, &needed, nullptr, 0) < 0)
-        {
-            qDebug() << "sysctl: net.route.0.0.dump";
-            delete[] buf;
-            return {};
-        }
-
-        struct rt_msghdr* rt;
-        for (char* p = buf; p < buf + needed; p += rt->rtm_msglen)
-        {
-            rt = reinterpret_cast<struct rt_msghdr*>(p);
-            struct sockaddr* sa = reinterpret_cast<struct sockaddr*>(rt + 1);
-            struct sockaddr* sa_tab[RTAX_MAX];
-            for (int i = 0; i < RTAX_MAX; i++)
-            {
-                if (rt->rtm_addrs & (1 << i))
-                {
-                    sa_tab[i] = sa;
-                    sa = reinterpret_cast<struct sockaddr*>(
-                            reinterpret_cast<char*>(sa) +
-                            ((sa->sa_len) > 0 ? (1 + (((sa->sa_len) - 1) | (sizeof(long) - 1))) : sizeof(long)));
-                }
-                else
-                {
-                    sa_tab[i] = nullptr;
-                }
-            }
-
-            if (((rt->rtm_addrs & (RTA_DST | RTA_GATEWAY)) == (RTA_DST | RTA_GATEWAY)) &&
-                sa_tab[RTAX_DST]->sa_family == afinet_type[ip_type] &&
-                sa_tab[RTAX_GATEWAY]->sa_family == afinet_type[ip_type])
-            {
-                if (afinet_type[ip_type] == AF_INET)
-                {
-                    if ((reinterpret_cast<struct sockaddr_in*>(sa_tab[RTAX_DST]))->sin_addr.s_addr == 0)
-                    {
-                        char dstStr4[INET_ADDRSTRLEN];
-                        char srcStr4[INET_ADDRSTRLEN];
-                        memcpy(srcStr4,
-                               &(reinterpret_cast<struct sockaddr_in*>(sa_tab[RTAX_GATEWAY]))->sin_addr,
-                               sizeof(struct in_addr));
-                        if (inet_ntop(AF_INET, srcStr4, dstStr4, INET_ADDRSTRLEN) != nullptr)
-                        {
-                            gateway = dstStr4;
-                            index = rt->rtm_index;
-                        }
-                        break;
-                    }
-                }
-                else if (afinet_type[ip_type] == AF_INET6)
-                {
-                    if ((reinterpret_cast<struct sockaddr_in*>(sa_tab[RTAX_DST]))->sin_addr.s_addr == 0)
-                    {
-                        char dstStr6[INET6_ADDRSTRLEN];
-                        char srcStr6[INET6_ADDRSTRLEN];
-                        memcpy(srcStr6,
-                               &(reinterpret_cast<struct sockaddr_in6*>(sa_tab[RTAX_GATEWAY]))->sin6_addr,
-                               sizeof(struct in6_addr));
-                        if (inet_ntop(AF_INET6, srcStr6, dstStr6, INET6_ADDRSTRLEN) != nullptr)
-                        {
-                            gateway = dstStr6;
-                            index = rt->rtm_index;
-                        }
-                        break;
-                    }
-                }
-            }
-        }
-        free(buf);
-    }
-
-    return { gateway, QNetworkInterface::interfaceFromIndex(index) };
-#endif
 }

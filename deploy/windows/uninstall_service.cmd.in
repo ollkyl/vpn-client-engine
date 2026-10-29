@@ -1,0 +1,12 @@
+@echo off
+:: Stops and removes the privileged service and the tunnel service it creates. Run as Administrator.
+
+set "SERVICE_NAME=@CLIENT_SERVICE_NAME@"
+set "TUNNEL_SERVICE_NAME=AmneziaWGTunnel$@CLIENT_APPLICATION_NAME@"
+
+sc stop "%TUNNEL_SERVICE_NAME%"
+sc delete "%TUNNEL_SERVICE_NAME%"
+sc stop "%SERVICE_NAME%"
+sc delete "%SERVICE_NAME%"
+taskkill /IM "%SERVICE_NAME%.exe" /F
+exit /b 0

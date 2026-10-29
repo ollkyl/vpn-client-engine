@@ -12,5 +12,9 @@
 #define APPLICATION_NAME        "@CLIENT_APPLICATION_NAME@"
 #define SERVICE_NAME            "@CLIENT_SERVICE_NAME@"
 #define ORGANIZATION_NAME       "@CLIENT_ORGANIZATION_NAME@"
+#define KEYCHAIN_NAME           "@CLIENT_KEYCHAIN_NAME@"
+
+// Wide variant for Windows APIs (service, adapter and driver names)
+#define APPLICATION_NAME_W      L"@CLIENT_APPLICATION_NAME@"
 
 #endif  // VERSION_H

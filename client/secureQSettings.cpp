@@ -2,6 +2,7 @@
 
 #include "core/utils/utilities.h"
 #include "cryptoUtils.h"
+#include "version.h"
 #include <QDataStream>
 #include <QDebug>
 #include <QEventLoop>
@@ -17,10 +18,7 @@ using namespace QKeychain;
 namespace {
     constexpr const char *settingsKeyTag = "settingsKeyTag";
     constexpr const char *settingsIvTag = "settingsIvTag";
-#ifndef CLIENT_KEYCHAIN_NAME_STR
-#define CLIENT_KEYCHAIN_NAME_STR "AmneziaVPN-Keychain"
-#endif
-    constexpr const char *keyChainName = CLIENT_KEYCHAIN_NAME_STR;
+    constexpr const char *keyChainName = KEYCHAIN_NAME;
 }
 
 SecureQSettings::SecureQSettings(const QString &organization, const QString &application, QObject *parent, bool enableEncryption)
@@ -205,10 +203,6 @@ bool SecureQSettings::encryptionRequired() const
     if (!m_encryptionEnabled) {
         return false;
     }
-#if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
-    // QtKeyChain failing on Linux
-    return false;
-#endif
     return true;
 }
 

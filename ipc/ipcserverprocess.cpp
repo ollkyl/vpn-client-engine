@@ -2,8 +2,6 @@
 #include "ipc.h"
 #include <QProcess>
 
-#ifndef Q_OS_IOS
-
 IpcServerProcess::IpcServerProcess(QObject *parent) :
     IpcProcessInterfaceSource(parent),
     m_process(QSharedPointer<QProcess>(new QProcess()))
@@ -65,9 +63,7 @@ void IpcServerProcess::setInputChannelMode(QProcess::InputChannelMode mode)
 
 void IpcServerProcess::setNativeArguments(const QString &arguments)
 {
-#ifdef Q_OS_WIN
     m_process->setNativeArguments(arguments);
-#endif
 }
 
 void IpcServerProcess::setProcessChannelMode(QProcess::ProcessChannelMode mode)
@@ -120,4 +116,3 @@ bool IpcServerProcess::waitForFinished(int msecs) {
     return m_process->waitForFinished(msecs);
 }
 
-#endif

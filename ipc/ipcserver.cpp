@@ -18,10 +18,7 @@
 #include "killswitch.h"
 #include "xray.h"
 
-#ifdef Q_OS_WIN
-    #include "tapcontroller_win.h"
-#endif
-
+#include "tapcontroller_win.h"
 
 IpcServer::IpcServer(QObject *parent) : IpcInterfaceSource(parent)
 {
@@ -115,11 +112,7 @@ bool IpcServer::checkAndInstallDriver()
     qDebug() << "IpcServer::checkAndInstallDriver";
 #endif
 
-#ifdef Q_OS_WIN
     return TapController::checkAndSetup();
-#else
-    return true;
-#endif
 }
 
 QStringList IpcServer::getTapList()
@@ -128,11 +121,7 @@ QStringList IpcServer::getTapList()
     qDebug() << "IpcServer::getTapList";
 #endif
 
-#ifdef Q_OS_WIN
     return TapController::getTapList();
-#else
-    return QStringList();
-#endif
 }
 
 void IpcServer::cleanUp()

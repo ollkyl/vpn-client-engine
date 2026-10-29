@@ -6,34 +6,12 @@
 namespace serverConfigUtils
 {
 
-enum ConfigType {
-    AmneziaFreeV2 = 0,
-    AmneziaFreeV3,
-    AmneziaPremiumV1,
-    AmneziaPremiumV2,
-    SelfHosted,
-    ExternalPremium,
+// True for a server built from an imported client config (WireGuard/AWG/OpenVPN/XRay/... file or vpn:// key).
+// Only such servers can be stored and connected by the engine.
+bool isNativeConfig(const QJsonObject &serverConfigObject);
 
-    SelfHostedAdmin = 8,
-    SelfHostedUser,
-    Native,
-    Invalid
-};
-
-enum ConfigSource {
-    Telegram = 1,
-    AmneziaGateway
-};
-
+// True for configs issued by the upstream Amnezia subscription API; the engine rejects them on import.
 bool isServerFromApi(const QJsonObject &serverConfigObject);
-
-ConfigSource getConfigSource(const QJsonObject &serverConfigObject);
-
-ConfigType configTypeFromJson(const QJsonObject &serverConfigObject);
-
-bool isLegacyApiSubscription(ConfigType configType);
-
-bool isApiV2Subscription(ConfigType configType);
 
 } // namespace serverConfigUtils
 

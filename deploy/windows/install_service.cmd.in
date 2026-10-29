@@ -1,0 +1,10 @@
+@echo off
+:: Registers and starts the privileged service. Run as Administrator from the install folder.
+
+set "SERVICE_NAME=@CLIENT_SERVICE_NAME@"
+set "SERVICE_EXE=%~dp0%SERVICE_NAME%.exe"
+
+sc create "%SERVICE_NAME%" binpath= "\"%SERVICE_EXE%\"" start= auto depend= BFE/nsi || exit /b 1
+sc failure "%SERVICE_NAME%" reset= 100 actions= restart/2000/restart/2000/restart/2000
+net start "%SERVICE_NAME%" || exit /b 1
+exit /b 0

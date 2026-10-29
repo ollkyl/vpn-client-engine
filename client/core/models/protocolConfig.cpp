@@ -8,10 +8,6 @@
 #include "core/utils/containers/containerUtils.h"
 #include "core/utils/protocolEnum.h"
 #include "core/models/protocols/ikev2ProtocolConfig.h"
-#include "core/models/protocols/dnsProtocolConfig.h"
-#include "core/models/protocols/mtProxyProtocolConfig.h"
-#include "core/models/protocols/telemtProtocolConfig.h"
-#include "core/models/protocols/tProxyProtocolConfig.h"
 
 namespace amnezia
 {
@@ -31,22 +27,8 @@ Proto ProtocolConfig::type() const
             return Proto::OpenVpn;
         } else if constexpr (std::is_same_v<T, XrayProtocolConfig>) {
             return Proto::Xray;
-        } else if constexpr (std::is_same_v<T, SftpProtocolConfig>) {
-            return Proto::Sftp;
-        } else if constexpr (std::is_same_v<T, Socks5ProxyProtocolConfig>) {
-            return Proto::Socks5Proxy;
         } else if constexpr (std::is_same_v<T, Ikev2ProtocolConfig>) {
             return Proto::Ikev2;
-        } else if constexpr (std::is_same_v<T, TorProtocolConfig>) {
-            return Proto::TorWebSite;
-        } else if constexpr (std::is_same_v<T, DnsProtocolConfig>) {
-            return Proto::Dns;
-        } else if constexpr (std::is_same_v<T, MtProxyProtocolConfig>) {
-            return Proto::MtProxy;
-        } else if constexpr (std::is_same_v<T, TelemtProtocolConfig>) {
-            return Proto::Telemt;
-        } else if constexpr (std::is_same_v<T, TProxyProtocolConfig>) {
-            return Proto::TProxy;
         }
         return Proto::Unknown;
     }, data);
@@ -64,22 +46,8 @@ QString ProtocolConfig::port() const
             return arg.serverConfig.port;
         } else if constexpr (std::is_same_v<T, XrayProtocolConfig>) {
             return arg.serverConfig.port;
-        } else if constexpr (std::is_same_v<T, SftpProtocolConfig>) {
-            return arg.port;
-        } else if constexpr (std::is_same_v<T, Socks5ProxyProtocolConfig>) {
-            return arg.port;
         } else if constexpr (std::is_same_v<T, Ikev2ProtocolConfig>) {
             return QString();
-        } else if constexpr (std::is_same_v<T, TorProtocolConfig>) {
-            return QString();
-        } else if constexpr (std::is_same_v<T, DnsProtocolConfig>) {
-            return QString();
-        } else if constexpr (std::is_same_v<T, MtProxyProtocolConfig>) {
-            return arg.port.isEmpty() ? QString(protocols::mtProxy::defaultPort) : arg.port;
-        } else if constexpr (std::is_same_v<T, TelemtProtocolConfig>) {
-            return arg.port.isEmpty() ? QString(protocols::telemt::defaultPort) : arg.port;
-        } else if constexpr (std::is_same_v<T, TProxyProtocolConfig>) {
-            return arg.port.isEmpty() ? QString(protocols::tProxy::defaultPort) : arg.port;
         }
         return QString();
     }, data);
@@ -99,16 +67,6 @@ QString ProtocolConfig::transportProto() const
             return arg.serverConfig.transportProto;
         } else if constexpr (std::is_same_v<T, Ikev2ProtocolConfig>) {
             return QString();
-        } else if constexpr (std::is_same_v<T, TorProtocolConfig>) {
-            return QString();
-        } else if constexpr (std::is_same_v<T, DnsProtocolConfig>) {
-            return QString();
-        } else if constexpr (std::is_same_v<T, MtProxyProtocolConfig>) {
-            return QStringLiteral("tcp");
-        } else if constexpr (std::is_same_v<T, TelemtProtocolConfig>) {
-            return QStringLiteral("tcp");
-        } else if constexpr (std::is_same_v<T, TProxyProtocolConfig>) {
-            return QStringLiteral("tcp");
         }
         return QString();
     }, data);
@@ -310,22 +268,8 @@ ProtocolConfig ProtocolConfig::fromJson(const QJsonObject& json, Proto type)
     case Proto::Xray:
     case Proto::SSXray:
         return ProtocolConfig{XrayProtocolConfig::fromJson(json)};
-    case Proto::Sftp:
-        return ProtocolConfig{SftpProtocolConfig::fromJson(json)};
-    case Proto::Socks5Proxy:
-        return ProtocolConfig{Socks5ProxyProtocolConfig::fromJson(json)};
     case Proto::Ikev2:
         return ProtocolConfig{Ikev2ProtocolConfig::fromJson(json)};
-    case Proto::TorWebSite:
-        return ProtocolConfig{TorProtocolConfig::fromJson(json)};
-    case Proto::Dns:
-        return ProtocolConfig{DnsProtocolConfig::fromJson(json)};
-    case Proto::MtProxy:
-        return ProtocolConfig{MtProxyProtocolConfig::fromJson(json)};
-    case Proto::Telemt:
-        return ProtocolConfig{TelemtProtocolConfig::fromJson(json)};
-    case Proto::TProxy:
-        return ProtocolConfig{TProxyProtocolConfig::fromJson(json)};
     default:
         return ProtocolConfig{AwgProtocolConfig{}};
     }

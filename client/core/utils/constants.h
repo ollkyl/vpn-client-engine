@@ -15,21 +15,7 @@ namespace Constants {
 inline QString versionString() { return QStringLiteral(APP_VERSION); }
 
 constexpr const char* PLATFORM_NAME =
-#if defined(MZ_IOS)
-    "ios"
-#elif defined(MZ_MACOS)
-    "macos"
-#elif defined(MZ_LINUX)
-    "linux"
-#elif defined(MZ_ANDROID)
-    "android"
-#elif defined(MZ_WINDOWS)
     "windows"
-#elif defined(UNIT_TEST) || defined(MZ_DUMMY)
-    "dummy"
-#else
-#  error "Unsupported platform"
-#endif
     ;
 }
 #endif  // CONSTANTS_H

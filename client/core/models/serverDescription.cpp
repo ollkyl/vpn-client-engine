@@ -1,13 +1,6 @@
 #include "serverDescription.h"
 
-#include <QMap>
-
-#include "core/utils/serverConfigUtils.h"
-#include "core/utils/constants/apiKeys.h"
-#include "core/utils/constants/apiConstants.h"
-#include "core/utils/constants/protocolConstants.h"
 #include "core/utils/containers/containerUtils.h"
-#include "core/protocols/protocolUtils.h"
 #include "core/models/protocols/awgProtocolConfig.h"
 
 using namespace amnezia;
@@ -15,67 +8,27 @@ using namespace amnezia;
 namespace
 {
 
-bool computeHasInstalledVpnContainers(const QMap<DockerContainer, ContainerConfig> &containers)
+QString protocolName(DockerContainer defaultContainer, const QMap<DockerContainer, ContainerConfig> &containers)
 {
-    for (auto it = containers.begin(); it != containers.end(); ++it) {
-        const DockerContainer container = it.key();
-        if (ContainerUtils::containerService(container) == ServiceType::Vpn || container == DockerContainer::SSXray) {
-            return true;
-        }
-    }
-    return false;
-}
-
-template <typename T>
-ServerDescription buildBaseDescription(const T &server)
-{
-    ServerDescription row;
-    row.hostName = server.hostName;
-    row.defaultContainer = server.defaultContainer;
-    row.primaryDnsIsAmnezia = (server.dns1 == protocols::dns::amneziaDnsIp);
-    row.hasInstalledVpnContainers = computeHasInstalledVpnContainers(server.containers);
-    return row;
-}
-
-QString getBaseDescription(const QMap<DockerContainer, ContainerConfig> &containers,
-                         bool isAmneziaDnsEnabled,
-                         bool hasWriteAccess,
-                         bool primaryDnsIsAmnezia)
-{
-    QString description;
-    if (hasWriteAccess) {
-        const bool isDnsInstalled = containers.contains(DockerContainer::Dns);
-        if (isAmneziaDnsEnabled && isDnsInstalled) {
-            description += QStringLiteral("Amnezia DNS | ");
-        }
-    } else if (primaryDnsIsAmnezia) {
-        description += QStringLiteral("Amnezia DNS | ");
-    }
-    return description;
-}
-
-QString getProtocolName(DockerContainer defaultContainer, const QMap<DockerContainer, ContainerConfig> &containers)
-{
-    QString containerName = ContainerUtils::containerHumanNames().value(defaultContainer);
-    QString protocolVersion;
-
-    if (ContainerUtils::isAwgContainer(defaultContainer)) {
-        const auto it = containers.constFind(defaultContainer);
-        if (it != containers.cend()) {
-            if (const AwgProtocolConfig *awg = it->getAwgProtocolConfig()) {
-                QString version = awg->clientProtocolVersion();
-                if (version.isEmpty()) {
-                    version = awg->serverProtocolVersion();
-                }
-                protocolVersion = AwgProtocolConfig::protocolVersionString(version);
-                if (defaultContainer == DockerContainer::Awg && !awg->serverConfig.isThirdPartyConfig) {
-                    containerName = QStringLiteral("AmneziaWG Legacy");
-                }
-            }
-        }
+    QString name = ContainerUtils::containerHumanNames().value(defaultContainer);
+    if (!ContainerUtils::isAwgContainer(defaultContainer)) {
+        return name;
     }
 
-    return containerName + protocolVersion + QStringLiteral(" | ");
+    const auto it = containers.constFind(defaultContainer);
+    if (it == containers.cend()) {
+        return name;
+    }
+    const AwgProtocolConfig *awg = it->getAwgProtocolConfig();
+    if (!awg) {
+        return name;
+    }
+
+    QString version = awg->clientProtocolVersion();
+    if (version.isEmpty()) {
+        version = awg->serverProtocolVersion();
+    }
+    return name + AwgProtocolConfig::protocolVersionString(version);
 }
 
 } // namespace
@@ -83,18 +36,16 @@ QString getProtocolName(DockerContainer defaultContainer, const QMap<DockerConta
 namespace amnezia
 {
 
-ServerDescription buildServerDescription(const NativeServerConfig &server, bool isAmneziaDnsEnabled)
+ServerDescription buildServerDescription(const QString &serverId, const NativeServerConfig &server)
 {
-    ServerDescription row = buildBaseDescription(server);
-    row.hasWriteAccess = false;
-
-    row.serverName = server.displayName;
-    row.baseDescription = getBaseDescription(server.containers, isAmneziaDnsEnabled, row.hasWriteAccess, row.primaryDnsIsAmnezia);
-
-    const QString protocolName = getProtocolName(server.defaultContainer, server.containers);
-    row.expandedServerDescription = row.baseDescription + row.hostName;
-    row.collapsedServerDescription = row.baseDescription + protocolName + row.hostName;
-    return row;
+    ServerDescription d;
+    d.serverId = serverId;
+    d.name = server.displayName;
+    d.hostName = server.hostName;
+    d.defaultContainer = server.defaultContainer;
+    d.containers = server.containers.keys();
+    d.protocolName = protocolName(server.defaultContainer, server.containers);
+    return d;
 }
 
 } // namespace amnezia

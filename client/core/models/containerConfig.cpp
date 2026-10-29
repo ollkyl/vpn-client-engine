@@ -5,7 +5,6 @@
 #include "core/utils/containerEnum.h"
 #include "core/utils/containers/containerUtils.h"
 #include "core/utils/protocolEnum.h"
-#include "core/utils/protocolEnum.h"
 #include "core/protocols/protocolUtils.h"
 #include "core/utils/constants/configKeys.h"
 #include "core/utils/constants/protocolConstants.h"
@@ -93,56 +92,6 @@ const XrayProtocolConfig* ContainerConfig::getXrayProtocolConfig() const
     return protocolConfig.as<XrayProtocolConfig>();
 }
 
-SftpProtocolConfig* ContainerConfig::getSftpProtocolConfig()
-{
-    return protocolConfig.as<SftpProtocolConfig>();
-}
-
-const SftpProtocolConfig* ContainerConfig::getSftpProtocolConfig() const
-{
-    return protocolConfig.as<SftpProtocolConfig>();
-}
-
-Socks5ProxyProtocolConfig* ContainerConfig::getSocks5ProxyProtocolConfig()
-{
-    return protocolConfig.as<Socks5ProxyProtocolConfig>();
-}
-
-const Socks5ProxyProtocolConfig* ContainerConfig::getSocks5ProxyProtocolConfig() const
-{
-    return protocolConfig.as<Socks5ProxyProtocolConfig>();
-}
-
-MtProxyProtocolConfig* ContainerConfig::getMtProxyProtocolConfig()
-{
-    return protocolConfig.as<MtProxyProtocolConfig>();
-}
-
-const MtProxyProtocolConfig* ContainerConfig::getMtProxyProtocolConfig() const
-{
-    return protocolConfig.as<MtProxyProtocolConfig>();
-}
-
-TelemtProtocolConfig* ContainerConfig::getTelemtProtocolConfig()
-{
-    return protocolConfig.as<TelemtProtocolConfig>();
-}
-
-const TelemtProtocolConfig* ContainerConfig::getTelemtProtocolConfig() const
-{
-    return protocolConfig.as<TelemtProtocolConfig>();
-}
-
-TProxyProtocolConfig* ContainerConfig::getTProxyProtocolConfig()
-{
-    return protocolConfig.as<TProxyProtocolConfig>();
-}
-
-const TProxyProtocolConfig* ContainerConfig::getTProxyProtocolConfig() const
-{
-    return protocolConfig.as<TProxyProtocolConfig>();
-}
-
 Ikev2ProtocolConfig* ContainerConfig::getIkev2ProtocolConfig()
 {
     return protocolConfig.as<Ikev2ProtocolConfig>();
@@ -151,26 +100,6 @@ Ikev2ProtocolConfig* ContainerConfig::getIkev2ProtocolConfig()
 const Ikev2ProtocolConfig* ContainerConfig::getIkev2ProtocolConfig() const
 {
     return protocolConfig.as<Ikev2ProtocolConfig>();
-}
-
-TorProtocolConfig* ContainerConfig::getTorProtocolConfig()
-{
-    return protocolConfig.as<TorProtocolConfig>();
-}
-
-const TorProtocolConfig* ContainerConfig::getTorProtocolConfig() const
-{
-    return protocolConfig.as<TorProtocolConfig>();
-}
-
-DnsProtocolConfig* ContainerConfig::getDnsProtocolConfig()
-{
-    return protocolConfig.as<DnsProtocolConfig>();
-}
-
-const DnsProtocolConfig* ContainerConfig::getDnsProtocolConfig() const
-{
-    return protocolConfig.as<DnsProtocolConfig>();
 }
 
 } // namespace amnezia

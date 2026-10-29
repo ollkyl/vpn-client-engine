@@ -1,20 +1,21 @@
 @echo off
 setlocal EnableDelayedExpansion
 
+:: Builds the engine (library, console client and service) and installs a runnable
+:: folder to deploy\build\install. Run from the repository root.
+:: Usage: deploy\build.bat [-arch x64|arm64]
+
 set "PROJECT_DIR=%cd%"
 set "BUILD_DIR=%PROJECT_DIR%\deploy\build"
+set "INSTALL_DIR=%BUILD_DIR%\install"
 
 :parse_args
 if "%~1"=="" goto :done_args
-if /i "%~1" == "-i"             set "ARG_BUILD_INSTALLERS=!ARG_BUILD_INSTALLERS! %~2" & shift
-if /i "%~1" == "--installer"    set "ARG_BUILD_INSTALLERS=!ARG_BUILD_INSTALLERS! %~2" & shift
 if /i "%~1" == "-arch"          set "ARCH=%~2" & shift
 if /i "%~1" == "--architecture" set "ARCH=%~2" & shift
 shift
 goto :parse_args
 :done_args
-
-if defined ARG_BUILD_INSTALLERS set "ARG_BUILD_INSTALLERS=%ARG_BUILD_INSTALLERS:all=ifw wix%"
 
 :: understand toolchain arch (host_target) and Qt prefix path
 if not defined ARCH set "ARCH=%PROCESSOR_ARCHITECTURE%"
@@ -35,7 +36,6 @@ if not defined _vcvars_arg  (
 )
 
 if not defined QT_VERSION  set "QT_VERSION=6.*"
-if not defined QIF_VERSION set "QIF_VERSION=*"
 
 set "_qt_bases=%USERPROFILE%\Qt C:\Qt"
 if defined QT_INSTALL_DIR set "_qt_bases=%QT_INSTALL_DIR%\Qt %_qt_bases%"
@@ -52,21 +52,11 @@ for %%B in (%_qt_bases%) do (
             )
         )
 
-        for /d %%D in (%%~B\Tools\QtInstallerFramework\%QIF_VERSION%) do (
-            if not defined _qif_root_path (
-                set "_qif_root_path=%%D"
-            ) else (
-                for %%I in (!_qif_root_path!) do call :compare_versions "%%~nxI" "%%~nxD"
-                if errorlevel 1 set "_qif_root_path=%%D"
-            )
-        )
-
         if exist "%%~B\Tools\Ninja" set "PATH=%PATH%;%%~B\Tools\Ninja"
     )
 )
 
 if not defined QT_ROOT_PATH  set "QT_ROOT_PATH=%_qt_root_path%"
-if not defined QIF_ROOT_PATH set "QIF_ROOT_PATH=%_qif_root_path%"
 
 :: use vswhere to find path to vcvarsall.bat
 if not defined VCINSTALLDIR (
@@ -93,29 +83,11 @@ if exist "%VCVARS_PATH%" (
     if errorlevel 1 goto :fail
 )
 
-:: build project and installers
+:: configure, build and install
 @echo on
 cmake -S "%PROJECT_DIR%" -B "%BUILD_DIR%" -DCMAKE_BUILD_TYPE=Release "-DCMAKE_PREFIX_PATH=%QT_ROOT_PATH%\msvc2022_%_qt_postfix_arg%" "-DCMAKE_VS_GLOBALS=UseMultiToolTask=true;EnforceProcessCountAcrossBuilds=true" || goto :fail
 cmake --build "%BUILD_DIR%" --config Release -- /m  || goto :fail
-@echo off
-for %%I in (%ARG_BUILD_INSTALLERS%) do (
-    if /i "%%I" == "ifw" call :do_ifw
-    if /i "%%I" == "wix" call :do_wix
-    if errorlevel 1 goto :fail
-)
-goto :eof
-
-:: bakes IFW installer
-:do_ifw
-@echo on
-cd "%BUILD_DIR%" && cpack -G IFW -D "QTIFWDIR=%QIF_ROOT_PATH%" || goto :fail
-@echo off
-goto :eof
-
-:: bakes WIX installer
-:do_wix
-@echo on
-cd "%BUILD_DIR%" && cpack -G WIX -D "WIX_BIN_DIR=%WIX_ROOT_PATH%" || goto :fail
+cmake --install "%BUILD_DIR%" --config Release --prefix "%INSTALL_DIR%" || goto :fail
 @echo off
 goto :eof
 

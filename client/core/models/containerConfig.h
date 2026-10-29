@@ -7,7 +7,6 @@
 #include "core/utils/containerEnum.h"
 #include "core/utils/containers/containerUtils.h"
 #include "core/utils/protocolEnum.h"
-#include "core/utils/protocolEnum.h"
 #include "core/protocols/protocolUtils.h"
 #include "core/utils/constants/configKeys.h"
 #include "core/utils/constants/protocolConstants.h"
@@ -51,29 +50,8 @@ struct ContainerConfig {
     XrayProtocolConfig* getXrayProtocolConfig();
     const XrayProtocolConfig* getXrayProtocolConfig() const;
     
-    SftpProtocolConfig* getSftpProtocolConfig();
-    const SftpProtocolConfig* getSftpProtocolConfig() const;
-    
-    Socks5ProxyProtocolConfig* getSocks5ProxyProtocolConfig();
-    const Socks5ProxyProtocolConfig* getSocks5ProxyProtocolConfig() const;
-    
-    MtProxyProtocolConfig* getMtProxyProtocolConfig();
-    const MtProxyProtocolConfig* getMtProxyProtocolConfig() const;
-
-    TelemtProtocolConfig* getTelemtProtocolConfig();
-    const TelemtProtocolConfig* getTelemtProtocolConfig() const;
-
-    TProxyProtocolConfig* getTProxyProtocolConfig();
-    const TProxyProtocolConfig* getTProxyProtocolConfig() const;
-
     Ikev2ProtocolConfig* getIkev2ProtocolConfig();
     const Ikev2ProtocolConfig* getIkev2ProtocolConfig() const;
-    
-    TorProtocolConfig* getTorProtocolConfig();
-    const TorProtocolConfig* getTorProtocolConfig() const;
-    
-    DnsProtocolConfig* getDnsProtocolConfig();
-    const DnsProtocolConfig* getDnsProtocolConfig() const;
 };
 
 } // namespace amnezia

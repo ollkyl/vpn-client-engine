@@ -4,7 +4,6 @@
 #include "ipc.h"
 #include <QObject>
 
-#ifndef Q_OS_IOS
 #include "rep_ipc_process_interface_source.h"
 
 class IpcServerProcess : public IpcProcessInterfaceSource
@@ -41,15 +40,5 @@ private:
     amnezia::PermittedProcess m_program = amnezia::PermittedProcess::Invalid;
     QSharedPointer<QProcess> m_process;
 };
-
-#else
-class IpcServerProcess : public QObject
-{
-    Q_OBJECT
-
-public:
-    explicit IpcServerProcess(QObject *parent = nullptr);
-};
-#endif
 
 #endif // IPCSERVERPROCESS_H

@@ -8,6 +8,7 @@
 #include <QTimer>
 
 #include "vpnProtocol.h"
+#include "version.h"
 #include "core/utils/ipcClient.h"
 
 #include <string>
@@ -41,7 +42,7 @@ public:
     ErrorCode start() override;
     void stop() override;
 
-    static QString tunnelName() { return "AmneziaVPN IKEv2"; }
+    static QString tunnelName() { return QStringLiteral(APPLICATION_NAME " IKEv2"); }
 
 public:
     void newConnectionStateEventReceived(UINT unMsg,

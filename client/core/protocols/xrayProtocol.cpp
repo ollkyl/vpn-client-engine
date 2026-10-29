@@ -19,11 +19,7 @@
 
 #include <exception>
 
-#ifdef Q_OS_MACOS
-static const QString tunName = "utun22";
-#else
 static const QString tunName = "tun2";
-#endif
 
 XrayProtocol::XrayProtocol(const QJsonObject &configuration, QObject *parent) : VpnProtocol(configuration, parent)
 {
@@ -145,18 +141,9 @@ void XrayProtocol::stop()
     if (m_tun2socksProcess) {
         m_tun2socksProcess->blockSignals(true);
 
-#ifndef Q_OS_WIN
-        m_tun2socksProcess->terminate();
-        auto waitForFinished = m_tun2socksProcess->waitForFinished(1000);
-        if (!waitForFinished.waitForFinished() || !waitForFinished.returnValue()) {
-            qWarning() << "Failed to terminate tun2socks. Killing the process...";
-            m_tun2socksProcess->kill();
-        }
-#else
         // terminate does not do anything useful on Windows
         // so just kill the process
         m_tun2socksProcess->kill();
-#endif
 
         m_tun2socksProcess->close();
         m_tun2socksProcess.reset();
@@ -252,9 +239,7 @@ ErrorCode XrayProtocol::setupRouting()
 {
     return IpcClient::withInterface(
             [this](QSharedPointer<IpcInterfaceReplica> iface) -> ErrorCode {
-#ifdef Q_OS_WIN
                 const int inetAdapterIndex = NetworkUtilities::AdapterIndexTo(QHostAddress(m_remoteAddress));
-#endif
                 auto createTun = iface->createTun(tunName, amnezia::protocols::xray::defaultLocalAddr);
                 if (!createTun.waitForFinished() || !createTun.returnValue()) {
                     qCritical() << "Failed to assign IP address for TUN";
@@ -267,7 +252,6 @@ ErrorCode XrayProtocol::setupRouting()
                     return ErrorCode::InternalError;
                 }
 
-#ifdef Q_OS_WIN
                 int vpnAdapterIndex = -1;
                 QList<QNetworkInterface> netInterfaces = QNetworkInterface::allInterfaces();
                 for (auto &netInterface : netInterfaces) {
@@ -276,9 +260,6 @@ ErrorCode XrayProtocol::setupRouting()
                             vpnAdapterIndex = netInterface.index();
                     }
                 }
-#else
-                static const int vpnAdapterIndex = 0;
-#endif
                 const bool killSwitchEnabled = QVariant(m_rawConfig.value(configKey::killSwitchOption).toString()).toBool();
                 if (killSwitchEnabled) {
                     if (vpnAdapterIndex != -1) {
@@ -311,7 +292,6 @@ ErrorCode XrayProtocol::setupRouting()
                     return ErrorCode::InternalError;
                 }
 
-#ifdef Q_OS_WIN
                 if (inetAdapterIndex != -1 && vpnAdapterIndex != -1) {
                     QJsonObject config = m_rawConfig;
                     config.insert("inetAdapterIndex", inetAdapterIndex);
@@ -326,7 +306,6 @@ ErrorCode XrayProtocol::setupRouting()
                     }
                 } else
                     qWarning() << "Failed to get adapter indexes. Split-tunneling disabled";
-#endif
                 return ErrorCode::NoError;
             },
             []() { return ErrorCode::AmneziaServiceConnectionFailed; });

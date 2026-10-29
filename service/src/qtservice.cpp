@@ -52,12 +52,7 @@
 #include <QFile>
 #include <QTime>
 #include <QMutex>
-#if defined(Q_OS_WIN32)
 #include <qt_windows.h>
-#else
-#include <unistd.h>
-#include <stdlib.h>
-#endif
 
 static QFile* f = 0;
 
@@ -81,22 +76,14 @@ void qtServiceLogDebug(QtMsgType type, const char* msg)
 {
     static QMutex mutex;
     QMutexLocker locker(&mutex);
-#if defined(Q_OS_WIN32)
     const qulonglong processId = GetCurrentProcessId();
-#else
-    const qulonglong processId = getpid();
-#endif
     QByteArray s(QTime::currentTime().toString("HH:mm:ss.zzz").toLatin1());
     s += " [";
     s += QByteArray::number(processId);
     s += "] ";
 
     if (!f) {
-#if defined(Q_OS_WIN32)
         f = new QFile("c:/service-debuglog.txt");
-#else
-        f = new QFile("/tmp/service-debuglog.txt");
-#endif
         if (!f->open(QIODevice::WriteOnly | QIODevice::Append)) {
             delete f;
             f = 0;
@@ -215,7 +202,6 @@ void qtServiceLogDebug(QtMsgType type, const char* msg)
     \sa startupType()
 */
 
-
 /*!
     Creates a controller object for the service with the given
     \a name.
@@ -325,7 +311,6 @@ bool QtServiceController::install(const QString &serviceFilePath, const QString 
     return (QProcess::execute(serviceFilePath, arguments) == 0);
 }
 
-
 /*!
     \fn bool QtServiceController::uninstall()
 
@@ -335,7 +320,6 @@ bool QtServiceController::install(const QString &serviceFilePath, const QString 
 
     On Unix service configuration is cleared using QSettings::SystemScope
     with "QtSoftware" as organization name.
-
 
     \sa install()
 */
@@ -481,7 +465,6 @@ int QtServiceBasePrivate::run(bool asService, const QStringList &argList)
         sysCleanup();
     return res;
 }
-
 
 /*!
     \class QtServiceBase
@@ -850,15 +833,6 @@ int QtServiceBase::exec()
             return 0;
         }
     }
-#if defined(Q_OS_UNIX)
-    if (::getenv("QTSERVICE_RUN")) {
-        // Means we're the detached, real service process.
-        int ec = d_ptr->run(true, d_ptr->args);
-        if (ec == -1)
-            qErrnoWarning("The service failed to run.");
-        return ec;
-    }
-#endif
     if (!d_ptr->start()) {
         fprintf(stderr, "The service %s could not start\n", serviceName().toLatin1().constData());
         return -4;
@@ -951,7 +925,6 @@ void QtServiceBase::resume()
 
 /*!
     Reimplement this function to process the user command \a code.
-
 
     This function is called in reply to controller requests.  The
     default implementation does nothing.

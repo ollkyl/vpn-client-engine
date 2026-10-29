@@ -21,8 +21,6 @@ public:
 
     static bool setServiceLogsEnabled(bool enabled);
 
-    static bool openLogsFolder(bool isServiceLogger);
-
     static void clearLogs(bool isServiceLogger);
     static void clearServiceLogs();
     static void cleanUp();

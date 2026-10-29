@@ -5,12 +5,10 @@
 #include <QJsonObject>
 #include <QObject>
 #include <QVector>
-#include <QtGlobal>
 #include <optional>
 
-#include "core/models/selfhosted/nativeServerConfig.h"
+#include "core/models/nativeServerConfig.h"
 #include "core/models/containerConfig.h"
-#include "core/utils/serverConfigUtils.h"
 #include "secureQSettings.h"
 
 using namespace amnezia;
@@ -22,12 +20,12 @@ class SecureServersRepository : public QObject
 public:
     explicit SecureServersRepository(SecureQSettings *settings, QObject *parent = nullptr);
 
-    QString addServer(const QString &serverId, const QJsonObject &serverJson, serverConfigUtils::ConfigType kind);
-    void editServer(const QString &serverId, const QJsonObject &serverJson, serverConfigUtils::ConfigType kind);
+    // Returns the id of the stored server, or an empty string if serverJson is not a supported config
+    QString addServer(const QString &serverId, const QJsonObject &serverJson);
+    bool editServer(const QString &serverId, const QJsonObject &serverJson);
     void removeServer(const QString &serverId);
-    serverConfigUtils::ConfigType serverKind(const QString &serverId) const;
 
-    std::optional<NativeServerConfig> nativeConfig(const QString &serverId) const;
+    std::optional<NativeServerConfig> serverConfig(const QString &serverId) const;
 
     int serversCount() const;
     int indexOfServerId(const QString &serverId) const;

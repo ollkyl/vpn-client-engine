@@ -14,6 +14,7 @@
 #include "platforms/windows/daemon/windowsfirewall.h"
 #include "platforms/windows/daemon/windowssplittunnel.h"
 #include "platforms/windows/windowsutils.h"
+#include "version.h"
 #include "windowsfirewall.h"
 
 #define PSAPI_VERSION 2
@@ -120,7 +121,7 @@ using ProcessInfo = struct {
 
 constexpr static const auto DRIVER_SYMLINK = L"\\\\.\\MULLVADSPLITTUNNEL";
 constexpr static const auto DRIVER_FILENAME = "mullvad-split-tunnel.sys";
-constexpr static const auto DRIVER_SERVICE_NAME = L"AmneziaVPNSplitTunnel";
+constexpr static const auto DRIVER_SERVICE_NAME = APPLICATION_NAME_W L"SplitTunnel";
 constexpr static const auto MV_SERVICE_NAME = L"MullvadVPN";
 
 #pragma endregion
@@ -618,7 +619,7 @@ std::vector<uint8_t> WindowsSplitTunnel::generateProcessBlob() {
 
 // static
 SC_HANDLE WindowsSplitTunnel::installDriver() {
-  LPCWSTR displayName = L"Amnezia Split Tunnel Service";
+  LPCWSTR displayName = APPLICATION_NAME_W L" Split Tunnel Service";
   QFileInfo driver(qApp->applicationDirPath() + "/" + DRIVER_FILENAME);
   if (!driver.exists()) {
     logger.error() << "Split Tunnel Driver File not found "

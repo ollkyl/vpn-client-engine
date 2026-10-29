@@ -6,19 +6,6 @@
 
 namespace amnezia
 {
-    struct ServerCredentials
-    {
-        QString hostName;
-        QString userName;
-        QString secretData;
-        int port = 22;
-
-        bool isValid() const
-        {
-            return !hostName.isEmpty() && !userName.isEmpty() && !secretData.isEmpty() && port > 0;
-        }
-    };
-
     struct InstalledAppInfo {
         QString appName;
         QString packageName;
@@ -48,13 +35,7 @@ namespace amnezia
     struct ConnectionSettings
     {
         DnsSettings dns;
-        bool isApiConfig;
         SplitTunnelingSettings splitTunneling;
-    };
-
-    struct ExportSettings
-    {
-        DnsSettings dns;
     };
 }
 

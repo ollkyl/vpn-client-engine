@@ -11,15 +11,7 @@
 #include "daemonlocalserverconnection.h"
 #include "leakdetector.h"
 #include "logger.h"
-
-#if defined(MZ_MACOS) || defined(MZ_LINUX)
-#  include <sys/stat.h>
-#  include <sys/types.h>
-#  include <unistd.h>
-
-constexpr const char* TMP_PATH = "/tmp/amneziavpn.socket";
-constexpr const char* VAR_PATH = "/var/run/amneziavpn/daemon.socket";
-#endif
+#include "version.h"
 
 namespace {
 Logger logger("DaemonLocalServer");
@@ -66,32 +58,5 @@ bool DaemonLocalServer::initialize() {
 }
 
 QString DaemonLocalServer::daemonPath() const {
-#if defined(MZ_WINDOWS)
-  return "\\\\.\\pipe\\amneziavpn";
-#endif
-#if defined(MZ_MACOS) || defined(MZ_LINUX)
-  QDir dir("/var/run");
-  if (!dir.exists()) {
-    logger.warning() << "/var/run doesn't exist. Fallback /tmp.";
-    return TMP_PATH;
-  }
-
-  if (dir.exists("amneziavpn")) {
-    logger.debug() << "/var/run/amneziavpn seems to be usable";
-    return VAR_PATH;
-  }
-
-  if (!dir.mkdir("amneziavpn")) {
-    logger.warning() << "Failed to create /var/run/amneziavpn";
-    return TMP_PATH;
-  }
-
-  if (chmod("/var/run/amneziavpn", S_IRWXU | S_IRWXG | S_IRWXO) < 0) {
-    logger.warning()
-        << "Failed to set the right permissions to /var/run/amneziavpn";
-    return TMP_PATH;
-  }
-
-  return VAR_PATH;
-#endif
+  return "\\\\.\\pipe\\" APPLICATION_NAME "-daemon";
 }

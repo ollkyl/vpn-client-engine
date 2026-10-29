@@ -25,15 +25,6 @@ namespace amnezia
             Ikev2,
             Xray,
             SSXray,
-
-            // non-vpn
-            TorWebSite,
-            Dns,
-            Sftp,
-            Socks5Proxy,
-            MtProxy,
-            Telemt,
-            TProxy,
         };
         Q_ENUM_NS(Proto)
 

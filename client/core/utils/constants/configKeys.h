@@ -17,31 +17,17 @@ namespace amnezia
         constexpr QLatin1String dns1("dns1");
         constexpr QLatin1String dns2("dns2");
 
-        constexpr QLatin1String serverIndex("serverIndex");
         constexpr QLatin1String description("description");
-        constexpr QLatin1String displayName("displayName");
-        constexpr QLatin1String name("name");
         constexpr QLatin1String cert("cert");
-        constexpr QLatin1String accessToken("api_key");
         constexpr QLatin1String config("config");
         constexpr QLatin1String configVersion("config_version");
-
-        constexpr QLatin1String sendPayload("send_payload");
-        constexpr QLatin1String sendPayloadEndpoint("endpoint");
-        constexpr QLatin1String sendPayloadTimeoutMs("timeout_ms");
-        constexpr QLatin1String sendPayloadProtocol("protocol");
-        constexpr QLatin1String sendPayloadData("payload");
-        constexpr QLatin1String sendPayloadExpectedResponse("expected_response");
 
         constexpr QLatin1String containers("containers");
         constexpr QLatin1String container("container");
         constexpr QLatin1String defaultContainer("defaultContainer");
 
         constexpr QLatin1String vpnProto("protocol");
-        constexpr QLatin1String protocol("protocol");
-        constexpr QLatin1String protocols("protocols");
 
-        constexpr QLatin1String remote("remote");
         constexpr QLatin1String transportProto("transport_proto");
         constexpr QLatin1String cipher("cipher");
         constexpr QLatin1String hash("hash");
@@ -50,7 +36,6 @@ namespace amnezia
 
         constexpr QLatin1String clientPrivKey("client_priv_key");
         constexpr QLatin1String clientPubKey("client_pub_key");
-        constexpr QLatin1String serverPrivKey("server_priv_key");
         constexpr QLatin1String serverPubKey("server_pub_key");
         constexpr QLatin1String pskKey("psk_key");
         constexpr QLatin1String mtu("mtu");
@@ -134,15 +119,9 @@ namespace amnezia
 
         constexpr QLatin1String openvpn("openvpn");
         constexpr QLatin1String wireguard("wireguard");
-        constexpr QLatin1String sftp("sftp");
         constexpr QLatin1String awg("awg");
-        constexpr QLatin1String vless("vless");
         constexpr QLatin1String xray("xray");
         constexpr QLatin1String ssxray("ssxray");
-        constexpr QLatin1String socks5proxy("socks5proxy");
-        constexpr QLatin1String mtproxy("mtproxy");
-        constexpr QLatin1String telemt("telemt");
-        constexpr QLatin1String tproxy("tproxy");
 
         constexpr QLatin1String splitTunnelSites("splitTunnelSites");
         constexpr QLatin1String splitTunnelType("splitTunnelType");
@@ -154,24 +133,13 @@ namespace amnezia
 
         constexpr QLatin1String killSwitchOption("killSwitchOption");
 
-        constexpr QLatin1String crc("crc");
-
         constexpr QLatin1String clientId("clientId");
-
-        constexpr QLatin1String nameOverriddenByUser("nameOverriddenByUser");
 
         constexpr QLatin1String amneziaOpenvpn("amnezia-openvpn");
         constexpr QLatin1String amneziaWireguard("amnezia-wireguard");
         constexpr QLatin1String amneziaAwg("amnezia-awg");
         constexpr QLatin1String amneziaXray("amnezia-xray");
         constexpr QLatin1String amneziaSsxray("amnezia-ssxray");
-
-        constexpr QLatin1String clientName("clientName");
-        constexpr QLatin1String userData("userData");
-        constexpr QLatin1String creationDate("creationDate");
-        constexpr QLatin1String latestHandshake("latestHandshake");
-        constexpr QLatin1String dataReceived("dataReceived");
-        constexpr QLatin1String dataSent("dataSent");
 
         constexpr QLatin1String storageServerId("storageServerId");
 

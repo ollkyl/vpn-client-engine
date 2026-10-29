@@ -1,7 +1,7 @@
 find_program(CONAN_COMMAND "conan" REQUIRED
     HINTS
+        "${CMAKE_SOURCE_DIR}/.venv/Scripts"
         "${CMAKE_SOURCE_DIR}/.venv/bin"
-        "/opt/homebrew/bin"
 )
 
 file(GLOB_RECURSE LOCAL_RECIPES "${CMAKE_SOURCE_DIR}/recipes/*/conanfile.py")

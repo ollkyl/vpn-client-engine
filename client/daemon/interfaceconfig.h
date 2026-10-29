@@ -42,9 +42,6 @@ class InterfaceConfig {
   QStringList m_vpnDisabledApps;
   QStringList m_allowedDnsServers;
   bool m_killSwitchEnabled;
-#if defined(MZ_ANDROID) || defined(MZ_IOS)
-  QString m_installationId;
-#endif
 
   QString m_junkPacketCount;
   QString m_junkPacketMinSize;

@@ -7,7 +7,6 @@
 #include <QUuid>
 
 #include "core/utils/serverConfigUtils.h"
-#include "core/utils/constants/apiKeys.h"
 #include "core/utils/constants/configKeys.h"
 
 using namespace amnezia;
@@ -31,29 +30,6 @@ QJsonObject embedStorageServerId(const QString &serverId, const QJsonObject &pay
     QJsonObject o = payloadSansId;
     o.insert(QString(configKey::storageServerId), serverId);
     return o;
-}
-
-QString storedServerDisplayName(const SecureServersRepository *repository, const QString &serverId)
-{
-    using Kind = serverConfigUtils::ConfigType;
-    switch (repository->serverKind(serverId)) {
-    case Kind::Native:
-        if (const auto cfg = repository->nativeConfig(serverId)) {
-            return cfg->displayName;
-        }
-        break;
-    case Kind::AmneziaPremiumV2:
-    case Kind::AmneziaFreeV3:
-    case Kind::ExternalPremium:
-    case Kind::AmneziaPremiumV1:
-    case Kind::AmneziaFreeV2:
-    case Kind::SelfHostedAdmin:
-    case Kind::SelfHostedUser:
-    case Kind::Invalid:
-    default:
-        break;
-    }
-    return {};
 }
 
 } // namespace
@@ -136,9 +112,8 @@ void SecureServersRepository::loadFromStorage()
         const QString candidateId = readStorageServerId(json);
         const QString serverId = normalizedOrGeneratedServerId(candidateId);
         const QJsonObject strippedJson = withoutStorageServerId(json);
-        const serverConfigUtils::ConfigType kind = serverConfigUtils::configTypeFromJson(strippedJson);
 
-        if (m_serverJsonById.contains(serverId) || kind == serverConfigUtils::ConfigType::Invalid) {
+        if (m_serverJsonById.contains(serverId) || !serverConfigUtils::isNativeConfig(strippedJson)) {
             continue;
         }
         m_serverJsonById.insert(serverId, embedStorageServerId(serverId, strippedJson));
@@ -183,9 +158,8 @@ QString SecureServersRepository::nextAvailableServerName() const
     usedNames.reserve(m_orderedServerIds.size());
 
     for (const QString &serverId : m_orderedServerIds) {
-        const QString displayName = storedServerDisplayName(this, serverId);
-        if (!displayName.isEmpty()) {
-            usedNames.insert(displayName);
+        if (const auto cfg = serverConfig(serverId); cfg && !cfg->displayName.isEmpty()) {
+            usedNames.insert(cfg->displayName);
         }
     }
 
@@ -199,18 +173,15 @@ QString SecureServersRepository::nextAvailableServerName() const
     return candidate;
 }
 
-QString SecureServersRepository::addServer(const QString &serverId, const QJsonObject &serverJson, serverConfigUtils::ConfigType kind)
+QString SecureServersRepository::addServer(const QString &serverId, const QJsonObject &serverJson)
 {
-    const QString id = normalizedOrGeneratedServerId(serverId);
-    if (m_serverJsonById.contains(id) || kind == serverConfigUtils::ConfigType::Invalid) {
-        return id;
-    }
     const QJsonObject strippedJson = withoutStorageServerId(serverJson);
-    if (serverConfigUtils::configTypeFromJson(strippedJson) != kind) {
-        return id;
+    if (!serverConfigUtils::isNativeConfig(strippedJson)) {
+        return QString();
     }
-    m_serverJsonById.insert(id, embedStorageServerId(id, strippedJson));
 
+    const QString id = normalizedOrGeneratedServerId(serverId);
+    m_serverJsonById.insert(id, embedStorageServerId(id, strippedJson));
     m_orderedServerIds.append(id);
 
     if (m_defaultServerId.isEmpty()) {
@@ -222,32 +193,22 @@ QString SecureServersRepository::addServer(const QString &serverId, const QJsonO
     return id;
 }
 
-void SecureServersRepository::editServer(const QString &serverId, const QJsonObject &serverJson, serverConfigUtils::ConfigType kind)
+bool SecureServersRepository::editServer(const QString &serverId, const QJsonObject &serverJson)
 {
-    if (indexOfServerId(serverId) < 0 || kind == serverConfigUtils::ConfigType::Invalid) {
-        return;
-    }
     if (!m_serverJsonById.contains(serverId)) {
-        return;
+        return false;
     }
 
-    const QJsonObject oldJson = m_serverJsonById.value(serverId);
-    const serverConfigUtils::ConfigType oldKind = serverConfigUtils::configTypeFromJson(withoutStorageServerId(oldJson));
-
-    m_serverJsonById.remove(serverId);
-
-    const QJsonObject strippedNew = withoutStorageServerId(serverJson);
-    if (serverConfigUtils::configTypeFromJson(strippedNew) != kind) {
-        const QJsonObject strippedOld = withoutStorageServerId(oldJson);
-        if (oldKind != serverConfigUtils::ConfigType::Invalid && serverConfigUtils::configTypeFromJson(strippedOld) == oldKind) {
-            m_serverJsonById.insert(serverId, embedStorageServerId(serverId, strippedOld));
-        }
-        return;
+    const QJsonObject strippedJson = withoutStorageServerId(serverJson);
+    if (!serverConfigUtils::isNativeConfig(strippedJson)) {
+        return false;
     }
-    m_serverJsonById.insert(serverId, embedStorageServerId(serverId, strippedNew));
+
+    m_serverJsonById.insert(serverId, embedStorageServerId(serverId, strippedJson));
 
     syncToStorage();
     emit serverEdited(serverId);
+    return true;
 }
 
 void SecureServersRepository::removeServer(const QString &serverId)
@@ -284,26 +245,13 @@ void SecureServersRepository::removeServer(const QString &serverId)
     emit serverRemoved(serverId, removedIndex);
 }
 
-serverConfigUtils::ConfigType SecureServersRepository::serverKind(const QString &serverId) const
-{
-    const auto it = m_serverJsonById.constFind(serverId);
-    if (it == m_serverJsonById.constEnd()) {
-        return serverConfigUtils::ConfigType::Invalid;
-    }
-    return serverConfigUtils::configTypeFromJson(withoutStorageServerId(it.value()));
-}
-
-std::optional<NativeServerConfig> SecureServersRepository::nativeConfig(const QString &serverId) const
+std::optional<NativeServerConfig> SecureServersRepository::serverConfig(const QString &serverId) const
 {
     const auto it = m_serverJsonById.constFind(serverId);
     if (it == m_serverJsonById.constEnd()) {
         return std::nullopt;
     }
-    const QJsonObject strippedJson = withoutStorageServerId(it.value());
-    if (serverConfigUtils::configTypeFromJson(strippedJson) != serverConfigUtils::ConfigType::Native) {
-        return std::nullopt;
-    }
-    return NativeServerConfig::fromJson(strippedJson);
+    return NativeServerConfig::fromJson(withoutStorageServerId(it.value()));
 }
 
 int SecureServersRepository::serversCount() const

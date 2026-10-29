@@ -2,22 +2,18 @@
 #include "localserver.h"
 #include "systemservice.h"
 
-
-#ifdef Q_OS_WIN
 #include "platforms/windows/daemon/windowsdaemontunnel.h"
 
 namespace {
 int s_argc = 0;
 char** s_argv = nullptr;
 }  // namespace
-#endif
 
 SystemService::SystemService(int argc, char **argv)
     : QtService<QCoreApplication>(argc, argv, SERVICE_NAME)
 {
-    setServiceDescription("Service for AmneziaVPN");
+    setServiceDescription("Service for " APPLICATION_NAME);
 
-#ifdef Q_OS_WIN
     if(argc > 2){
         s_argc = argc;
         s_argv = argv;
@@ -33,7 +29,6 @@ SystemService::SystemService(int argc, char **argv)
         }
 
     }
-#endif
 
 }
 

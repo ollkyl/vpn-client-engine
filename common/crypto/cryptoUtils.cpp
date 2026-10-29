@@ -5,7 +5,7 @@
 #include <QDebug>
 
 #include <openssl/err.h>
-#include <openssl/pem.h>
+#include <openssl/evp.h>
 #include <openssl/rand.h>
 
 namespace
@@ -118,63 +118,4 @@ QByteArray CryptoUtils::decryptAes256Cbc(const QByteArray &data, const QByteArra
 
     plainText.resize(plainTextLength);
     return plainText;
-}
-
-EVP_PKEY *CryptoUtils::loadPublicKeyFromPem(const QByteArray &pem)
-{
-    std::unique_ptr<BIO, decltype(&BIO_free)> bio { BIO_new_mem_buf(pem.constData(), pem.size()), BIO_free };
-    if (!bio) {
-        qCritical() << "CryptoUtils::loadPublicKeyFromPem BIO_new_mem_buf failed:" << lastOpenSslError();
-        return nullptr;
-    }
-
-    EVP_PKEY *key = PEM_read_bio_PUBKEY(bio.get(), nullptr, nullptr, nullptr);
-    if (!key) {
-        qCritical() << "CryptoUtils::loadPublicKeyFromPem PEM_read_bio_PUBKEY failed:" << lastOpenSslError();
-        return nullptr;
-    }
-
-    return key;
-}
-
-QByteArray CryptoUtils::rsaEncrypt(const QByteArray &data, EVP_PKEY *publicKey, int padding)
-{
-    if (!publicKey) {
-        qCritical() << "CryptoUtils::rsaEncrypt public key is null";
-        return {};
-    }
-
-    std::unique_ptr<EVP_PKEY_CTX, decltype(&EVP_PKEY_CTX_free)> ctx { EVP_PKEY_CTX_new(publicKey, nullptr), EVP_PKEY_CTX_free };
-    if (!ctx) {
-        qCritical() << "CryptoUtils::rsaEncrypt EVP_PKEY_CTX_new failed:" << lastOpenSslError();
-        return {};
-    }
-
-    if (EVP_PKEY_encrypt_init(ctx.get()) != 1) {
-        qCritical() << "CryptoUtils::rsaEncrypt EVP_PKEY_encrypt_init failed:" << lastOpenSslError();
-        return {};
-    }
-
-    if (EVP_PKEY_CTX_set_rsa_padding(ctx.get(), padding) != 1) {
-        qCritical() << "CryptoUtils::rsaEncrypt EVP_PKEY_CTX_set_rsa_padding failed:" << lastOpenSslError();
-        return {};
-    }
-
-    const auto *plainData = reinterpret_cast<const unsigned char *>(data.constData());
-
-    std::size_t cipherTextLength = 0;
-    if (EVP_PKEY_encrypt(ctx.get(), nullptr, &cipherTextLength, plainData, data.size()) != 1) {
-        qCritical() << "CryptoUtils::rsaEncrypt couldn't determine buffer length:" << lastOpenSslError();
-        return {};
-    }
-
-    QByteArray cipherText(static_cast<int>(cipherTextLength), Qt::Uninitialized);
-    if (EVP_PKEY_encrypt(ctx.get(), reinterpret_cast<unsigned char *>(cipherText.data()), &cipherTextLength, plainData, data.size())
-        != 1) {
-        qCritical() << "CryptoUtils::rsaEncrypt EVP_PKEY_encrypt failed:" << lastOpenSslError();
-        return {};
-    }
-
-    cipherText.resize(static_cast<int>(cipherTextLength));
-    return cipherText;
 }

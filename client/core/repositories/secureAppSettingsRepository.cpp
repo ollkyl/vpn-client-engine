@@ -5,26 +5,12 @@
 #include <QJsonObject>
 #include <QUuid>
 
-#include "core/utils/errorCodes.h"
-#include "core/utils/routeModes.h"
-#include "core/utils/commonStructs.h"
-#include "core/utils/serverConfigUtils.h"
-#include "core/utils/constants/apiKeys.h"
-#include "core/utils/constants/apiConstants.h"
-#include "core/utils/constants/configKeys.h"
-#include "core/utils/networkUtilities.h"
 
 using namespace amnezia;
-
-namespace {
-    constexpr char gatewayEndpoint[] = "http://gw.amnezia.org:80/";
-}
 
 SecureAppSettingsRepository::SecureAppSettingsRepository(SecureQSettings* settings, QObject *parent)
     : QObject(parent), m_settings(settings)
 {
-    QString storedEndpoint = value("Conf/gatewayEndpoint", gatewayEndpoint).toString();
-    m_gatewayEndpoint = storedEndpoint.isEmpty() ? gatewayEndpoint : storedEndpoint;
 }
 
 QVariant SecureAppSettingsRepository::value(const QString &key, const QVariant &defaultValue) const
@@ -35,18 +21,6 @@ QVariant SecureAppSettingsRepository::value(const QString &key, const QVariant &
 void SecureAppSettingsRepository::setValue(const QString &key, const QVariant &value)
 {
     m_settings->setValue(key, value);
-}
-
-QLocale SecureAppSettingsRepository::getAppLanguage() const
-{
-    QString localeStr = value("Conf/appLanguage", QLocale::system().name()).toString();
-    return QLocale(localeStr);
-}
-
-void SecureAppSettingsRepository::setAppLanguage(QLocale locale)
-{
-    setValue("Conf/appLanguage", locale.name());
-    emit appLanguageChanged(locale);
 }
 
 bool SecureAppSettingsRepository::useAmneziaDns() const
@@ -270,60 +244,6 @@ void SecureAppSettingsRepository::setAppsSplitTunnelingEnabled(bool enabled)
     emit appsSplitTunnelingEnabledChanged(enabled);
 }
 
-QString SecureAppSettingsRepository::getGatewayEndpoint(bool isTestPurchase) const
-{
-    if (isTestPurchase) {
-        return QString(DEV_AGW_ENDPOINT);
-    }
-    return m_gatewayEndpoint;
-}
-
-void SecureAppSettingsRepository::setGatewayEndpoint(const QString &endpoint)
-{
-    m_gatewayEndpoint = endpoint;
-    setValue("Conf/gatewayEndpoint", endpoint);
-}
-
-void SecureAppSettingsRepository::resetGatewayEndpoint()
-{
-    m_gatewayEndpoint = gatewayEndpoint;
-    setValue("Conf/gatewayEndpoint", gatewayEndpoint);
-}
-
-void SecureAppSettingsRepository::setDevGatewayEndpoint()
-{
-    m_gatewayEndpoint = QString(DEV_AGW_ENDPOINT);
-    setValue("Conf/gatewayEndpoint", DEV_AGW_ENDPOINT);
-}
-
-bool SecureAppSettingsRepository::isDevGatewayEnv(bool isTestPurchase) const
-{
-    return isTestPurchase ? true : value("Conf/devGatewayEnv", false).toBool();
-}
-
-void SecureAppSettingsRepository::toggleDevGatewayEnv(bool enabled)
-{
-    setValue("Conf/devGatewayEnv", enabled);
-}
-
-QByteArray SecureAppSettingsRepository::readGatewayProxyUrls(const QString &cacheKey) const
-{
-    if (cacheKey.isEmpty()) {
-        return {};
-    }
-
-    return value(QStringLiteral("Conf/proxyUrls/") + cacheKey).toByteArray();
-}
-
-void SecureAppSettingsRepository::writeGatewayProxyUrls(const QString &cacheKey, const QByteArray &proxyUrlsEncrypted)
-{
-    if (cacheKey.isEmpty()) {
-        return;
-    }
-
-    setValue(QStringLiteral("Conf/proxyUrls/") + cacheKey, proxyUrlsEncrypted);
-}
-
 bool SecureAppSettingsRepository::isKillSwitchEnabled() const
 {
     return value("Conf/killSwitchEnabled", true).toBool();
@@ -342,47 +262,6 @@ bool SecureAppSettingsRepository::isStrictKillSwitchEnabled() const
 void SecureAppSettingsRepository::setStrictKillSwitchEnabled(bool enabled)
 {
     setValue("Conf/strictKillSwitchEnabled", enabled);
-}
-
-bool SecureAppSettingsRepository::isAutoConnect() const
-{
-    return value("Conf/autoConnect", false).toBool();
-}
-
-void SecureAppSettingsRepository::setAutoConnect(bool enabled)
-{
-    setValue("Conf/autoConnect", enabled);
-}
-
-bool SecureAppSettingsRepository::isStartMinimized() const
-{
-    return value("Conf/startMinimized", false).toBool();
-}
-
-void SecureAppSettingsRepository::setStartMinimized(bool enabled)
-{
-    setValue("Conf/startMinimized", enabled);
-}
-
-bool SecureAppSettingsRepository::isScreenshotsEnabled() const
-{
-    return value("Conf/screenshotsEnabled", true).toBool();
-}
-
-void SecureAppSettingsRepository::setScreenshotsEnabled(bool enabled)
-{
-    setValue("Conf/screenshotsEnabled", enabled);
-    emit screenshotsEnabledChanged(enabled);
-}
-
-bool SecureAppSettingsRepository::isAutoUpdateCheckEnabled() const
-{
-    return value("Conf/autoUpdateCheck", true).toBool();
-}
-
-void SecureAppSettingsRepository::setAutoUpdateCheckEnabled(bool enabled)
-{
-    setValue("Conf/autoUpdateCheck", enabled);
 }
 
 bool SecureAppSettingsRepository::isSaveLogs() const
@@ -422,35 +301,10 @@ QString SecureAppSettingsRepository::getInstallationUuid(bool createIfNotExists)
     return uuid;
 }
 
-QByteArray SecureAppSettingsRepository::backupAppConfig() const
-{
-    return m_settings->backupAppConfig();
-}
-
-bool SecureAppSettingsRepository::restoreAppConfig(const QByteArray &cfg)
-{
-    return m_settings->restoreAppConfig(cfg);
-}
-
 void SecureAppSettingsRepository::clearSettings()
 {
     auto uuid = getInstallationUuid(false);
     m_settings->clearSettings();
     m_settings->setValue("Conf/installationUuid", uuid);
     emit settingsCleared();
-}
-
-void SecureAppSettingsRepository::setInstallationUuid(const QString &uuid)
-{
-    m_settings->setValue("Conf/installationUuid", uuid);
-}
-
-QByteArray SecureAppSettingsRepository::xraySavedConfigs() const
-{
-    return value("Xray/savedConfigs").toByteArray();
-}
-
-void SecureAppSettingsRepository::setXraySavedConfigs(const QByteArray &data)
-{
-    setValue("Xray/savedConfigs", data);
 }

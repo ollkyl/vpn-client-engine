@@ -13,33 +13,10 @@
 #include "networkwatcherimpl.h"
 //#include "settingsholder.h"
 
-#ifdef MZ_WINDOWS
 #  include "platforms/windows/windowsnetworkwatcher.h"
-#endif
-
-#ifdef MZ_LINUX
-#  include "platforms/linux/linuxnetworkwatcher.h"
-#endif
-
-#ifdef MZ_MACOS
-#  include "platforms/macos/macosnetworkwatcher.h"
-#endif
-
-#ifdef MZ_WASM
-#  include "platforms/wasm/wasmnetworkwatcher.h"
-#endif
-#ifdef MZ_ANDROID
-#  include "platforms/android/androidnetworkwatcher.h"
-#endif
-
-#ifdef MZ_IOS
-#  include "platforms/ios/iosnetworkwatcher.h"
-#endif
 
 // How often we notify the same unsecured network
-#ifndef UNIT_TEST
 constexpr uint32_t NETWORK_WATCHER_TIMER_MSEC = 20000;
-#endif
 
 namespace {
 Logger logger("NetworkWatcher");
@@ -52,22 +29,7 @@ NetworkWatcher::~NetworkWatcher() { MZ_COUNT_DTOR(NetworkWatcher); }
 void NetworkWatcher::initialize() {
   logger.debug() << "Initialize NetworkWatcher";
 
-#if defined(MZ_WINDOWS)
   m_impl = new WindowsNetworkWatcher(this);
-#elif defined(MZ_LINUX)
-  m_impl = new LinuxNetworkWatcher(this);
-#elif defined(MZ_MACOS)
-  m_impl = new MacOSNetworkWatcher(this);
-#elif defined(MZ_WASM)
-  m_impl = new WasmNetworkWatcher(this);
-#elif defined(MZ_ANDROID)
-  m_impl = new AndroidNetworkWatcher(this);
-#elif defined(MZ_IOS)
-  m_impl = new IOSNetworkWatcher(this);
-#else
-  m_impl = new DummyNetworkWatcher(this);
-#endif
-
 
   connect(m_impl, &NetworkWatcherImpl::unsecuredNetwork, this,
           &NetworkWatcher::unsecuredNetwork);
@@ -101,7 +63,6 @@ void NetworkWatcher::unsecuredNetwork(const QString& networkName,
                                       const QString& networkId) {
   logger.debug() << "Unsecured network:" << logger.sensitive(networkName)
                  << "id:" << logger.sensitive(networkId);
-#ifndef UNIT_TEST
   if (!m_reportUnsecuredNetwork) {
     logger.debug() << "Disabled. Ignoring unsecured network";
     return;
@@ -146,9 +107,7 @@ void NetworkWatcher::unsecuredNetwork(const QString& networkName,
 
   NotificationHandler::instance()->unsecuredNetworkNotification(networkName);
 #endif
-#endif
 }
-
 
 QNetworkInformation::Reachability NetworkWatcher::getReachability() {
   if (m_simulatedDisconnection) {

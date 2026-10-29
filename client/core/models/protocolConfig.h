@@ -11,20 +11,12 @@
 #include "core/utils/constants/protocolConstants.h"
 #include "core/utils/containerEnum.h"
 #include "core/utils/containers/containerUtils.h"
-#include "core/utils/protocolEnum.h"
 
 #include "core/models/protocols/awgProtocolConfig.h"
 #include "core/models/protocols/wireGuardProtocolConfig.h"
 #include "core/models/protocols/openVpnProtocolConfig.h"
 #include "core/models/protocols/xrayProtocolConfig.h"
-#include "core/models/protocols/sftpProtocolConfig.h"
-#include "core/models/protocols/socks5ProxyProtocolConfig.h"
 #include "core/models/protocols/ikev2ProtocolConfig.h"
-#include "core/models/protocols/torProtocolConfig.h"
-#include "core/models/protocols/dnsProtocolConfig.h"
-#include "core/models/protocols/mtProxyProtocolConfig.h"
-#include "core/models/protocols/telemtProtocolConfig.h"
-#include "core/models/protocols/tProxyProtocolConfig.h"
 
 namespace amnezia
 {
@@ -37,14 +29,7 @@ struct ProtocolConfig {
         WireGuardProtocolConfig,
         OpenVpnProtocolConfig,
         XrayProtocolConfig,
-        SftpProtocolConfig,
-        Socks5ProxyProtocolConfig,
-        MtProxyProtocolConfig,
-        TelemtProtocolConfig,
-        TProxyProtocolConfig,
-        Ikev2ProtocolConfig,
-        TorProtocolConfig,
-        DnsProtocolConfig
+        Ikev2ProtocolConfig
     >;
     
     Variant data;

@@ -6,22 +6,12 @@
 #include <QString>
 #include <QScopedPointer>
 #include <QRemoteObjectNode>
-#include <QTimer>
 
 #include "core/protocols/vpnProtocol.h"
+#include "core/utils/containerEnum.h"
 #include "core/utils/errorCodes.h"
 #include "core/utils/routeModes.h"
-#include "core/utils/commonStructs.h"
-#include "core/repositories/secureServersRepository.h"
 #include "core/repositories/secureAppSettingsRepository.h"
-
-#ifdef AMNEZIA_DESKTOP
-#include "core/utils/ipcClient.h"
-#endif
-
-#ifdef Q_OS_ANDROID
-#include "core/protocols/androidVpnProtocol.h"
-#endif
 
 using namespace amnezia;
 
@@ -30,7 +20,7 @@ class VpnConnection : public QObject
     Q_OBJECT
 
 public:
-    explicit VpnConnection(SecureServersRepository* serversRepository, SecureAppSettingsRepository* appSettingsRepository, QObject* parent = nullptr);
+    explicit VpnConnection(SecureAppSettingsRepository* appSettingsRepository, QObject* parent = nullptr);
     ~VpnConnection() override;
 
     static QString bytesPerSecToText(quint64 bytes);
@@ -43,12 +33,7 @@ public:
     const QString &remoteAddress() const;
     void addSitesRoutes(const QString &gw, amnezia::RouteMode mode);
 
-#ifdef Q_OS_ANDROID
-    void restoreConnection();
-#endif
-
 public slots:
-    void setRepositories(SecureServersRepository* serversRepository, SecureAppSettingsRepository* appSettingsRepository);
     void connectToVpn(const QString &serverId, DockerContainer container, const QJsonObject &vpnConfiguration);
     void reconnectToVpn();
     void disconnectFromVpn();
@@ -73,29 +58,17 @@ protected:
     QSharedPointer<VpnProtocol> m_vpnProtocol;
 
 private:
-    SecureServersRepository* m_serversRepository;
+    void createProtocolConnections();
+    void appendSplitTunnelingConfig();
+    void appendKillSwitchConfig();
+
     SecureAppSettingsRepository* m_appSettingsRepository;
 
     QJsonObject m_vpnConfiguration;
-    QJsonObject m_routeMode;
+    DockerContainer m_container = DockerContainer::None;
     QString m_remoteAddress;
 
-    // Only for iOS for now, check counters
-    QTimer m_checkTimer;
-
-#ifdef Q_OS_ANDROID
-   AndroidVpnProtocol* androidVpnProtocol = nullptr;
-
-   AndroidVpnProtocol* createDefaultAndroidVpnProtocol();
-   void createAndroidConnections();
-#endif
-
-   Vpn::ConnectionState m_connectionState;
-
-   void createProtocolConnections();
-
-   void appendSplitTunnelingConfig();
-   void appendKillSwitchConfig();
+    Vpn::ConnectionState m_connectionState;
 };
 
 #endif // VPNCONNECTION_H

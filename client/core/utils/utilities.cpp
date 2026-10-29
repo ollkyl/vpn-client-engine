@@ -2,7 +2,6 @@
 #include <QDebug>
 #include <QDir>
 #include <QProcess>
-#include <QRandomGenerator>
 #include <QRegularExpression>
 #include <QStandardPaths>
 #include <QUrl>
@@ -11,7 +10,6 @@
 
 #include "core/utils/utilities.h"
 
-#ifdef Q_OS_WINDOWS
 QString printErrorMessage(DWORD errorCode) {
     LPVOID lpMsgBuf;
 
@@ -34,49 +32,6 @@ QString printErrorMessage(DWORD errorCode) {
     QString errorMsg = QString::fromWCharArray((LPCWSTR)lpMsgBuf);
     LocalFree(lpMsgBuf);
     return errorMsg.trimmed();
-}
-
-QString Utils::getNextDriverLetter()
-{
-    DWORD drivesBitmask = GetLogicalDrives();
-    if (drivesBitmask == 0) {
-        DWORD error = GetLastError();
-        qDebug() << "GetLogicalDrives failed. Error code:" << error;
-        return "";
-    }
-
-    QString letters = "FGHIJKLMNOPQRSTUVWXYZ";
-    QString availableLetter;
-
-    for (int i = letters.size() - 1; i >= 0; --i) {
-        QChar letterChar = letters.at(i);
-        int driveIndex = letterChar.toLatin1() - 'A';
-
-        if ((drivesBitmask & (1 << driveIndex)) == 0) {
-            availableLetter = letterChar;
-            break;
-        }
-    }
-
-    if (availableLetter.isEmpty()) {
-        qDebug() << "Can't find free drive letter";
-        return "";
-    }
-
-    return availableLetter;
-}
-#endif
-
-QString Utils::getRandomString(int len)
-{
-    const QString possibleCharacters = QStringLiteral("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
-    QString randomString;
-
-    for (int i = 0; i < len; ++i) {
-        randomString.append(possibleCharacters.at(QRandomGenerator::system()->bounded(possibleCharacters.length())));
-    }
-
-    return randomString;
 }
 
 QString Utils::VerifyJsonString(const QString &source)
@@ -133,18 +88,10 @@ bool Utils::initializePath(const QString &path)
     return true;
 }
 
-bool Utils::createEmptyFile(const QString &path)
-{
-    QFile f(path);
-    return f.open(QIODevice::WriteOnly | QIODevice::Truncate);
-}
-
 QString Utils::executable(const QString &baseName, bool absPath)
 {
     QString ext;
-#ifdef Q_OS_WIN
     ext = ".exe";
-#endif
     const QString fileName = baseName + ext;
     if (!absPath) {
         return fileName;
@@ -152,17 +99,8 @@ QString Utils::executable(const QString &baseName, bool absPath)
     return QCoreApplication::applicationDirPath() + "/" + fileName;
 }
 
-QString Utils::usrExecutable(const QString &baseName)
-{
-    if (QFileInfo::exists("/usr/sbin/" + baseName))
-        return ("/usr/sbin/" + baseName);
-    else
-        return ("/usr/bin/" + baseName);
-}
-
 bool Utils::processIsRunning(const QString &fileName, const bool fullFlag)
 {
-#ifdef Q_OS_WIN
     HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
     if (hSnapshot == INVALID_HANDLE_VALUE) {
         qWarning() << "Utils::processIsRunning error CreateToolhelp32Snapshot";
@@ -190,33 +128,11 @@ bool Utils::processIsRunning(const QString &fileName, const bool fullFlag)
     CloseHandle(hSnapshot);
     return false;
 
-#elif defined(Q_OS_IOS) || defined(Q_OS_ANDROID) || defined(MACOS_NE)
-    return false;
-#else
-    QProcess process;
-    QStringList arguments;
-    if (fullFlag) {
-        arguments << "-f";
-    }
-    arguments << fileName;
-    process.setProcessChannelMode(QProcess::MergedChannels);
-    process.start("pgrep", arguments);
-    process.waitForFinished();
-    if (process.exitStatus() == QProcess::NormalExit) {
-        if (fullFlag) {
-            return (process.readLine().toUInt() > 0);
-        } else {
-            return (process.readAll().toUInt() > 0);
-        }
-    }
-    return false;
-#endif
 }
 
 bool Utils::killProcessByName(const QString &name)
 {
     qDebug().noquote() << "Kill process" << name;
-#ifdef Q_OS_WIN
     HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
     if (hSnapshot == INVALID_HANDLE_VALUE)
         return false;
@@ -250,11 +166,6 @@ bool Utils::killProcessByName(const QString &name)
 
     CloseHandle(hSnapshot);
     return success;
-#elif defined Q_OS_IOS || defined(Q_OS_ANDROID)
-    return false;
-#else
-    return QProcess::execute("pkill", { name }) == 0;
-#endif
 }
 
 QString Utils::openVpnExecPath()
@@ -264,81 +175,16 @@ QString Utils::openVpnExecPath()
 
 QString Utils::wireguardExecPath()
 {
-#ifdef Q_OS_WIN
     return Utils::executable("wireguard/wireguard-service", true);
-#elif defined Q_OS_LINUX
-    return Utils::usrExecutable("wg-quick");
-#elif defined Q_OS_MAC
-    return Utils::executable("/wireguard", true);
-#else
-    return {};
-#endif
 }
 
 QString Utils::certUtilPath()
 {
-#ifdef Q_OS_WIN
     QString winPath = QString::fromUtf8(qgetenv("windir"));
     return winPath + "\\system32\\certutil.exe";
-#else
-    return "";
-#endif
 }
 
 QString Utils::tun2socksPath()
 {
     return Utils::executable("tun2socks", true);
-}
-
-#ifdef Q_OS_WIN
-// Inspired from http://stackoverflow.com/a/15281070/1529139
-// and http://stackoverflow.com/q/40059902/1529139
-bool Utils::signalCtrl(DWORD dwProcessId, DWORD dwCtrlEvent)
-{
-    bool success = false;
-    DWORD thisConsoleId = GetCurrentProcessId();
-    // Leave current console if it exists
-    // (otherwise AttachConsole will return ERROR_ACCESS_DENIED)
-    bool consoleDetached = (FreeConsole() != FALSE);
-
-    if (AttachConsole(dwProcessId) != FALSE) {
-        // Add a fake Ctrl-C handler for avoid instant kill is this console
-        // WARNING: do not revert it or current program will be also killed
-        SetConsoleCtrlHandler(nullptr, true);
-        success = (GenerateConsoleCtrlEvent(dwCtrlEvent, 0) != FALSE);
-        FreeConsole();
-    }
-
-    if (consoleDetached) {
-        // Create a new console if previous was deleted by OS
-        if (AttachConsole(thisConsoleId) == FALSE) {
-            int errorCode = GetLastError();
-            if (errorCode == 31) // 31=ERROR_GEN_FAILURE
-            {
-                AllocConsole();
-            }
-        }
-    }
-    return success;
-}
-
-#endif
-
-void Utils::logException(const std::exception &e)
-{
-    qCritical() << e.what();
-    try {
-        std::rethrow_if_nested(e);
-    } catch (const std::exception &nested) {
-        logException(nested);
-    } catch (...) {}
-}
-
-void Utils::logException(const std::exception_ptr &eptr)
-{
-    try {
-        if (eptr) std::rethrow_exception(eptr);
-    } catch (const std::exception &e) {
-        logException(e);
-    } catch (...) {}
 }

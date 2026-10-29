@@ -2,9 +2,9 @@
 #define KILLSWITCH_H
 
 #include <QJsonObject>
-#include <QSharedPointer>
+#include <QObject>
+#include <QStringList>
 
-#include "secureQSettings.h"
 
 class KillSwitch : public QObject
 {
@@ -24,8 +24,6 @@ public:
 private:
     KillSwitch(QObject* parent) {};
     QStringList m_allowedRanges;
-    QSharedPointer<SecureQSettings> m_appSettigns;
-
 };
 
 #endif // KILLSWITCH_H

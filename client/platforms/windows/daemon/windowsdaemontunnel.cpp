@@ -14,6 +14,7 @@
 #include "logger.h"
 #include "platforms/windows/daemon/wireguardutilswindows.h"
 #include "platforms/windows/windowsutils.h"
+#include "version.h"
 
 namespace {
 Logger logger("WindowsDaemonTunnel");
@@ -34,7 +35,7 @@ int WindowsDaemonTunnel::run(QStringList& tokens) {
 
   QCoreApplication app();
 
-  QCoreApplication::setApplicationName("Amnezia VPN Tunnel");
+  QCoreApplication::setApplicationName(APPLICATION_NAME " Tunnel");
   QCoreApplication::setApplicationVersion(Constants::versionString());
 
   if (tokens.length() != 2) {

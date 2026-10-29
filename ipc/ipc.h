@@ -7,8 +7,9 @@
 #include <QSet>
 
 #include "../client/core/utils/utilities.h"
+#include "version.h"
 
-#define IPC_SERVICE_URL "local:AmneziaVpnIpcInterface"
+#define IPC_SERVICE_URL "local:" APPLICATION_NAME "IpcInterface"
 
 namespace amnezia {
 
@@ -37,21 +38,12 @@ inline QString permittedProcessPath(PermittedProcess pid)
     }
 }
 
-
 inline QString getIpcServiceUrl() {
-#ifdef Q_OS_WIN
     return IPC_SERVICE_URL;
-#else
-    return QString("/tmp/%1").arg(IPC_SERVICE_URL);
-#endif
 }
 
 inline QString getIpcProcessUrl(int pid) {
-#ifdef Q_OS_WIN
     return QString("%1_%2").arg(IPC_SERVICE_URL).arg(pid);
-#else
-    return QString("/tmp/%1_%2").arg(IPC_SERVICE_URL).arg(pid);
-#endif
 }
 
 inline QStringList sanitizeArguments(PermittedProcess proc, const QStringList &args) {

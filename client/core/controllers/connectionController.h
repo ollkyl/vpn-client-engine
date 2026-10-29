@@ -7,11 +7,8 @@
 #include <memory>
 
 #include "core/utils/containerEnum.h"
-#include "core/utils/containers/containerUtils.h"
-#include "core/utils/protocolEnum.h"
 #include "core/utils/errorCodes.h"
-#include "core/utils/routeModes.h"
-#include "core/utils/commonStructs.h"
+#include "core/models/containerConfig.h"
 #include "core/repositories/secureServersRepository.h"
 #include "core/repositories/secureAppSettingsRepository.h"
 #include "core/protocols/vpnProtocol.h"
@@ -40,10 +37,6 @@ public:
 
     void closeConnection();
 
-#ifdef Q_OS_ANDROID
-    void restoreConnection();
-#endif
-
     void onKillSwitchModeChanged(bool enabled);
 
     ErrorCode lastConnectionError() const;
@@ -52,10 +45,8 @@ public:
     void setConnectionState(Vpn::ConnectionState state);
 
     QJsonObject createConnectionConfiguration(const QPair<QString, QString> &dns,
-                                             bool isApiConfig,
                                              const QString &hostName,
                                              const QString &description,
-                                             int configVersion,
                                              const ContainerConfig &containerConfig,
                                              DockerContainer container);
 
@@ -69,13 +60,7 @@ signals:
     void closeConnectionRequested();
     void killSwitchModeChangedRequested(bool enabled);
 
-#ifdef Q_OS_ANDROID
-    void restoreConnectionRequested();
-#endif
-
 private:
-    ErrorCode defaultContainerForServer(const QString &serverId, DockerContainer &container) const;
-
     SecureServersRepository* m_serversRepository;
     SecureAppSettingsRepository* m_appSettingsRepository;
     VpnConnection* m_vpnConnection;

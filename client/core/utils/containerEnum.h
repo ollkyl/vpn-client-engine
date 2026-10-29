@@ -20,15 +20,6 @@ namespace amnezia
             Ipsec,
             Xray,
             SSXray,
-
-            // non-vpn
-            TorWebSite,
-            Dns,
-            Sftp,
-            Socks5Proxy,
-            MtProxy,
-            Telemt,
-            TProxy,
         };
         Q_ENUM_NS(DockerContainer)
     } // namespace ContainerEnumNS

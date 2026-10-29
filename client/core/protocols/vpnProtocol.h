@@ -4,7 +4,6 @@
 #include <QObject>
 #include <QString>
 #include <QJsonObject>
-#include <QtQml/qqml.h>
 
 #include "core/utils/errorCodes.h"
 #include "core/utils/routeModes.h"
@@ -17,7 +16,6 @@ using namespace amnezia;
 
 class QTimer;
 
-//todo change name
 namespace Vpn
 {
     Q_NAMESPACE
@@ -32,16 +30,6 @@ namespace Vpn
         Error
     };
     Q_ENUM_NS(ConnectionState)
-
-    static void declareQmlVpnConnectionStateEnum() {
-        qmlRegisterUncreatableMetaObject(
-            Vpn::staticMetaObject,
-            "ConnectionState",
-            1, 0,
-            "ConnectionState",
-            "Error: only enums"
-            );
-    }
 }
 
 class VpnProtocol : public QObject

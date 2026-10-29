@@ -17,7 +17,7 @@
 
 #define TUNNEL_NAMED_PIPE \
   "\\\\."                 \
-  "\\pipe\\ProtectedPrefix\\Administrators\\AmneziaWG\\AmneziaVPN"
+  "\\pipe\\ProtectedPrefix\\Administrators\\AmneziaWG\\" APPLICATION_NAME
 
 constexpr uint32_t WINDOWS_TUNNEL_MONITOR_TIMEOUT_MSEC = 2000;
 
@@ -148,7 +148,7 @@ bool WindowsTunnelService::start(const QString& configData) {
 
   logger.debug() << "Service:" << qApp->applicationFilePath();
 
-  service = CreateService(scm, TUNNEL_SERVICE_NAME, L"Amnezia VPN (tunnel)",
+  service = CreateService(scm, TUNNEL_SERVICE_NAME, APPLICATION_NAME_W L" (tunnel)",
                           SERVICE_ALL_ACCESS, SERVICE_WIN32_OWN_PROCESS,
                           SERVICE_DEMAND_START, SERVICE_ERROR_NORMAL,
                           (const wchar_t*)serviceCmdline.utf16(), nullptr, 0,

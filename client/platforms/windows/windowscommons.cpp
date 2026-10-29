@@ -19,8 +19,9 @@
 
 #include "logger.h"
 #include "platforms/windows/windowsutils.h"
+#include "version.h"
 
-constexpr const char* VPN_NAME = "AmneziaVPN";
+constexpr const char* VPN_NAME = APPLICATION_NAME;
 constexpr const char* WIREGUARD_DIR = "AmneziaWG";
 constexpr const char* DATA_DIR = "Data";
 
@@ -134,7 +135,7 @@ int WindowsCommons::VPNAdapterIndex() {
   // For someReason QNetworkInterface::fromName(MozillaVPN) does not work >:(
   auto adapterList = QNetworkInterface::allInterfaces();
   for (const auto& adapter : adapterList) {
-    if (adapter.humanReadableName().contains("AmneziaVPN")) {
+    if (adapter.humanReadableName().contains(VPN_NAME)) {
       return adapter.index();
     }
   }

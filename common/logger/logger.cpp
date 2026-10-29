@@ -2,22 +2,16 @@
 
 #include <QDateTime>
 #include <QDebug>
-#include <QDesktopServices>
 #include <QDir>
 #include <QJsonDocument>
 #include <QMetaEnum>
 #include <QStandardPaths>
-#include <QUrl>
 
 #include "core/utils/utilities.h"
 #include "version.h"
 
 #ifdef AMNEZIA_DESKTOP
     #include <core/utils/ipcClient.h>
-#endif
-
-#ifdef Q_OS_IOS
-    #include "core/utils/swiftBridge.h"
 #endif
 
 QFile Logger::m_file;
@@ -111,7 +105,6 @@ QString Logger::userLogsDir()
 
 QString Logger::systemLogDir()
 {
-#ifdef Q_OS_WIN
     QStringList locationList = QStandardPaths::standardLocations(QStandardPaths::GenericDataLocation);
     QString primaryLocation = "ProgramData";
     foreach (const QString &location, locationList) {
@@ -120,9 +113,6 @@ QString Logger::systemLogDir()
         }
     }
     return QString();
-#else
-    return QString("/var/log/%1").arg(APPLICATION_NAME);
-#endif
 }
 
 QString Logger::userLogsFilePath()
@@ -143,13 +133,7 @@ QString Logger::getLogFile()
     QFile file(userLogsFilePath());
 
     file.open(QIODevice::ReadOnly);
-    QString qtLog = file.readAll();
-
-#ifdef Q_OS_IOS
-    return QString().fromStdString(SWIFT_BRIDGE_NAMESPACE::swiftUpdateLogData(qtLog.toStdString()));
-#else
-    return qtLog;
-#endif
+    return file.readAll();
 }
 
 QString Logger::getServiceLogFile()
@@ -160,26 +144,7 @@ QString Logger::getServiceLogFile()
     QFile file(serviceLogsFilePath());
 
     file.open(QIODevice::ReadOnly);
-    QString qtLog = file.readAll();
-
-#ifdef Q_OS_IOS
-    return QString().fromStdString(SWIFT_BRIDGE_NAMESPACE::swiftUpdateLogData(qtLog.toStdString()));
-#else
-    return qtLog;
-#endif
-}
-
-bool Logger::openLogsFolder(bool isServiceLogger)
-{
-    QString path = isServiceLogger ? systemLogDir() : userLogsDir();
-#ifdef Q_OS_WIN
-    path = "file:///" + path;
-#endif
-    if (!QDesktopServices::openUrl(QUrl::fromLocalFile(path))) {
-        qWarning() << "Can't open url:" << path;
-        return false;
-    }
-    return true;
+    return file.readAll();
 }
 
 void Logger::clearLogs(bool isServiceLogger)
@@ -192,10 +157,6 @@ void Logger::clearLogs(bool isServiceLogger)
     file.open(QIODevice::WriteOnly | QIODevice::Truncate);
     file.resize(0);
     file.close();
-
-#ifdef Q_OS_IOS
-    SWIFT_BRIDGE_NAMESPACE::swiftDeleteLog();
-#endif
 
     if (isLogActive) {
         init(isServiceLogger);
